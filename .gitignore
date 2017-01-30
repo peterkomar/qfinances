@@ -2,6 +2,7 @@ qfinances.pro.user
 Makefile
 bin/*
 src/build/*
+.idea/*
 src/Makefile
 src/qrc_application.cpp
 
