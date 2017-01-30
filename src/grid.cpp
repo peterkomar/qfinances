@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,19 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#include "grid.h"
+#include <QtWidgets>
 
-#include "financesapp.h"
-#include "finances.h"
-
-int main(int argc, char *argv[])
-{
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
-
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
-
-  delete finance;
-  return code;
+Grid::Grid(QWidget *parent) :
+    QTableWidget(parent)
+{    
+    setRowCount(50);
+    setAlternatingRowColors(true);
+    verticalHeader()->setVisible(false);
+    verticalHeader()->setDefaultSectionSize(20);
+    horizontalHeader()->setStretchLastSection(true);
+    horizontalHeader()->setHighlightSections(false);
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setSelectionBehavior(QAbstractItemView::SelectRows);
 }
-

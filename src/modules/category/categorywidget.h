@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,38 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef CATEGORYWIDGET_H
+#define CATEGORYWIDGET_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include "../../modulewidget.h"
 
-int main(int argc, char *argv[])
+class QToolButton;
+class QTreeWidget;
+
+class CategoryWidget : public ModuleWidget
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    CategoryWidget(ModuleParams *params);
+    
+signals:
+    
+public slots:
+    void slotEdit();
+    void slotEnableEditing();
+    void slotDelete();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+protected:
+    virtual void topPanel(QVBoxLayout *layout);
+    virtual void mainPanel(QVBoxLayout *layout);
+    virtual void bottomPanel(QVBoxLayout *layout);
 
-  delete finance;
-  return code;
-}
+private:
+    void _loadData();
 
+    QTreeWidget *m_treeGrid;
+    QToolButton *editBtn;
+    QToolButton *remBtn;
+};
+
+#endif // CATEGORYWIDGET_H

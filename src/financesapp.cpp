@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,32 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include <QTranslator>
-
 #include "financesapp.h"
-#include "finances.h"
+#include <typeinfo>
 
-int main(int argc, char *argv[])
+FinancesApp::FinancesApp(int &argc, char **argv, int flags)
+    :QApplication(argc, argv, flags)
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
-
-  delete finance;
-  return code;
 }
 
+bool FinancesApp::notify(QObject* receiver, QEvent* event)
+{
+    try {
+            return QApplication::notify(receiver, event);
+        } catch (std::exception &e) {
+            qFatal("Error %s sending event %s to object %s (%s)",
+                e.what(), typeid(*event).name(), qPrintable(receiver->objectName()),
+                typeid(*receiver).name());
+        } catch (int code) {
+            qFatal("Query error!");
+        } catch (...) {
+            qFatal("Error <unknown> sending event %s to object %s (%s)",
+                typeid(*event).name(), qPrintable(receiver->objectName()),
+                typeid(*receiver).name());
+        }
+
+        // qFatal aborts, so this isn't really necessary
+        // but you might continue if you use a different logging lib
+        return false;
+}

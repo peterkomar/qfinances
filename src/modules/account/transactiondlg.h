@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef TRANSACTIONDLG_H
+#define TRANSACTIONDLG_H
 
-#include <QTranslator>
+#include "dialog.h"
+#include "database.h"
+#include "transaction.h"
 
-#include "financesapp.h"
-#include "finances.h"
+class QLineEdit;
+class QDateTimeEdit;
+class QTextEdit;
+class QLabel;
+class Account;
+class TreeComboBox;
+class QRadioButton;
 
-int main(int argc, char *argv[])
+class TransactionDlg : public Dialog
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    TransactionDlg(Transaction *transaction, QWidget *parent = 0, bool readOnly = false);
+    ~TransactionDlg();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+protected slots:
+    void slot_save();
+    void slot_categoryChanged();
 
-  delete finance;
-  return code;
-}
+private:
+    QRadioButton *m_uiIncomes;
+    QRadioButton *m_uiExpences;
+    QDateTimeEdit *m_uiDate;
+    TreeComboBox *m_uiCategory;
+    QLineEdit *m_uiAmount;
+    QTextEdit *m_uiComment;
 
+    Transaction *m_transaction;
+
+    void _gui(QGridLayout *layout);
+    void _data();
+    void _readOnly();
+};
+
+#endif // TRANSACTIONDLG_H

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,56 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef FNCMODEL_H
+#define FNCMODEL_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QString>
+#include <QList>
 
-int main(int argc, char *argv[])
+class DataBase;
+class QSqlQuery;
+class Model;
+
+typedef QList<Model*> Models;
+
+class Condition {
+public:
+    Condition(Model *m);
+    ~Condition();
+
+    Model *model;
+    QString where;
+    QString order;
+    int start;
+    int limit;
+};
+
+class Model
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+public:
+    Model(DataBase *m_db, int id = 0);
+    virtual ~Model();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+    virtual int id() = 0;
+    virtual bool save() = 0;
+    void remove();
+    bool load();
 
-  delete finance;
-  return code;
-}
+    DataBase *m_db;
+    QString lastErrorMessage() const { return m_error_message; }
 
+    Condition* condition();
+    Models items(bool resetCondition = true);
+
+protected:
+    virtual void fetch(QSqlQuery *q) = 0;
+    virtual const QString table() = 0;
+    virtual Model* model() = 0;
+
+    QString m_error_message;
+
+private:
+    Condition* m_condition;
+};
+
+#endif // FNCMODEL_H

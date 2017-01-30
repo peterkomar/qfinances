@@ -2,69 +2,64 @@ TEMPLATE = app
 CONFIG += warn_on \
     thread \
     qt \
- release
-TARGET = bin/qfinances
-OBJECTS_DIR = build
-MOC_DIR = build
-UI_DIR = build
-RCC_DIR = build
+ debug #uncomment for debug
+#release #uncomment for production
+
+TARGET = ../finances
+
+OBJECTS_DIR = ../build
+MOC_DIR = ../build
+UI_DIR = ../build
+RCC_DIR = ../build
+
+# Components
+include(core/core.pri)
+include(modules/account/account.pri)
+include(modules/currency/currency.pri)
+include(modules/category/category.pri)
+
 SOURCES += main.cpp \
     finances.cpp \
-    dockwidg.cpp \
-    fdatabase.cpp \
-    misc.cpp \
     topheader.cpp \
-    mystatusbar.cpp \
-    filterdlgimpl.cpp \
-    helpbrowser.cpp \
-    titlebar.cpp \
-    mortgagordlgimpl.cpp \
-    mytransactionslist.cpp \
-    parametersdlgimpl.cpp \
-    transactiondlgimpl.cpp \
-    accountpanelimpl.cpp \
-    preferencesdlgImpl.cpp \
-    querytable.cpp
+    navpanel.cpp \
+    modules.cpp \
+    database.cpp \
+    logindialog.cpp \
+    grid.cpp \
+    module.cpp \
+    modulewidget.cpp \
+    financesapp.cpp \
+    dialog.cpp \
+    model.cpp \
+    navigationwidget.cpp \
+    treecombobox.cpp \
+    properties.cpp
 HEADERS += finances.h \
-    dockwidg.h \
-    fdatabase.h \
-    misc.h \
     topheader.h \
-    mystatusbar.h \
-    filterdlgimpl.h \
-    helpbrowser.h \
-    titlebar.h \
-    mortgagordlgimpl.h \
-    mytransactionslist.h \
-    parametersdlgimpl.h \
-    transactiondlgimpl.h \
-    preferencesdlgImpl.h \
-    querytable.h \
-    accountpanelimpl.h
+    navpanel.h \
+    modules.h \
+    database.h \
+    logindialog.h \
+    grid.h \
+    module.h \
+    modulewidget.h \
+    project.h \
+    financesapp.h \
+    dialog.h \
+    model.h \
+    navigationwidget.h \
+    treecombobox.h \
+    properties.h
+
 RESOURCES += application.qrc
-RC_FILE = winicon.rc
+win32{
+  RC_FILE = winicon.rc
+}
+macx: {
+  ICON = pictures/myfinances2.icns
+}
 QT += widgets sql printsupport
-TRANSLATIONS += lang/Ukrainian.ts \
- lang/German.ts \
- lang/Russian.ts
 
-target.path = ../../QFinances
-documentation.path = ../../QFinances/doc
-documentation.files = doc/*
-translation.path = ../../QFinances/lang
-translation.files = lang/*.qm
-data_css.path = ../../QFinances
-data_css.files = data/*.*
+FORMS +=
 
-INSTALLS += target \
-    documentation \
-    data_css \
-    translation
-
-FORMS += \
-    parameters.ui \
-    preferences.ui \
-    transaction.ui \
-    account.ui \
-    mortgagordialog.ui \
-    mortgagors.ui
+DISTFILES +=

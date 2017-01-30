@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,50 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#include "maincurrency.h"
+#include "currencywidget.h"
+#include "currency.h"
 
-#include "financesapp.h"
-#include "finances.h"
-
-int main(int argc, char *argv[])
+MainCurrency::MainCurrency(ModuleParams *params)
+    : Module(params)
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
-
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
-
-  delete finance;
-  return code;
 }
 
+void MainCurrency::exec()
+{
+    Module::exec();
+
+    CurrencyWidget *panel = new CurrencyWidget(m_p);
+    panel->gui();
+
+    int index = m_p->m_mainWidget->addWidget(panel);
+
+    m_p->m_cfg->addItem(
+                QPixmap(":pictures/currency.png"),
+                "Currencies",
+               index
+                );
+}
+
+void MainCurrency::_install()
+{
+    QStringList list = m_p->m_db->db()->tables();
+    if (list.contains("currency")) {
+        return;
+    }
+
+    QSqlQuery *q = m_p->m_db->query();
+    q->prepare(
+        "CREATE TABLE currency ("
+          "id int,"
+          "name varchar,"
+          "code varcchar,"
+          "symbol_left varchar,"
+          "symbol_right varchar,"
+          "value double,"
+          "is_removed int"
+        ")"
+    );
+    m_p->m_db->exec(q);
+    this->_installData("currencies");
+}

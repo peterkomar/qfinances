@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef CATEGORYITEM_H
+#define CATEGORYITEM_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QList>
+#include <QVariant>
 
-int main(int argc, char *argv[])
+class CategoryItem
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+public:
+    CategoryItem(int id, const QString& name, CategoryItem *parentItem = 0);
+    ~CategoryItem();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+    int id() { return i_id; }    
+    void appendChild(CategoryItem *item);
+    CategoryItem *child(int row);
+    CategoryItem *childById(int categoryId);
+    int childCount() const;
+    QVariant data(bool path = false) const;
+    int row() const;
+    CategoryItem *parentItem();
 
-  delete finance;
-  return code;
-}
+private:
+    QList<CategoryItem*> m_childItems;
+    QString m_text;
+    QString m_path;
+    int i_id;
+    CategoryItem *m_parentItem;
+};
 
+#endif // CATEGORYITEM_H

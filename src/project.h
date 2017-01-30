@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,19 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef PROJECT
+#define PROJECT
 
-#include "financesapp.h"
-#include "finances.h"
+//Define projects constants to compile
+#define MFN_DEBUG 1
 
-int main(int argc, char *argv[])
-{
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+//Defined libs for debug mode
+#ifdef MFN_DEBUG
+#include <QDebug>
+#endif
 
-  delete finance;
-  return code;
-}
+#include <QMessageBox>
+
+#endif // PROJECT
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef ACCOUNTWIDGET_H
+#define ACCOUNTWIDGET_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include "modulewidget.h"
 
-int main(int argc, char *argv[])
+class NavigationGroup;
+
+class AccountWidget : public ModuleWidget
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    AccountWidget(ModuleParams *params);
+    ~AccountWidget();
+    void setAccountsGroup(NavigationGroup *accountGroup);
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+public slots:
+    void slotEdit();
+    void slotEnableEditing();
+    void slotDelete();
+    void slotClose();
 
-  delete finance;
-  return code;
-}
+protected:
+    virtual void topPanel(QVBoxLayout *layout);
+    virtual void mainPanel(QVBoxLayout *layout);
+    virtual void bottomPanel(QVBoxLayout *layout);
 
+private:
+    void _loadData();
+
+    NavigationGroup *m_accountsGroup;
+
+    QToolButton *editBtn;
+    QToolButton *remBtn;
+    QToolButton *closeBtn;
+};
+
+#endif // ACCOUNTWIDGET_H

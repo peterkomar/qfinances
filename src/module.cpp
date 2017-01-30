@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,44 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#include "module.h"
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QLocale>
+#include <QFile>
 
-int main(int argc, char *argv[])
+Module::Module(ModuleParams *params)
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
-
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
-
-  delete finance;
-  return code;
+    m_p = params;
 }
 
+Module::~Module()
+{
+
+}
+
+void Module::exec()
+{
+    this->_install();
+}
+
+void Module::_installData(const QString& name)
+{
+    QString file = name + QLocale::system().name();
+    if (!QFile::exists(":/demo/sql/"+file+".sql")) {
+        file = name;
+    }
+
+    QFile data("://demo/sql/"+file+".sql");
+    if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return;
+    }
+
+    QTextStream in(&data);
+    while (!in.atEnd()) {
+        QString sql = in.readLine();
+        QSqlQuery *q = m_p->m_db->query();
+        q->prepare(sql);
+        m_p->m_db->exec(q);
+    }
+    data.close();
+}

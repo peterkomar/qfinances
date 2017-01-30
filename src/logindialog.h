@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,46 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef LOGINDIALOG_H
+#define LOGINDIALOG_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QDialog>
 
-int main(int argc, char *argv[])
+class QLineEdit;
+class QComboBox;
+class QLabel;
+class QPushButton;
+
+class LoginDialog : public QDialog
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+  Q_OBJECT
+public:
+  LoginDialog(QWidget *parent = 0);
+  QString login() const;
+  QString password() const;
+  void setFocusPassword(bool );
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+signals:
+  void success(LoginDialog *);
+  
+public slots:
+  void slot_accept();
+  void slot_new(const QString& text);
 
-  delete finance;
-  return code;
-}
+protected:
+    void closeEvent(QCloseEvent *event);
 
+private:
+    void _gui();
+    void _tabOrder();
+    void _setModeCreate(bool mode = true);
+
+    bool bModeCreate;
+    QLineEdit *m_linePassword;
+    QLabel   *m_labelPassword2;
+    QLineEdit *m_linePassword2;
+    QComboBox *m_selectAccount;
+    QPushButton *m_loginBtn;
+};
+
+#endif // LOGINDIALOG_H

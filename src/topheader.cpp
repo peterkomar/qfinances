@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,27 +22,25 @@
 
 #include <QtGui>
 
-TopHeader::TopHeader(QWidget *p)
-    :QWidget(p)
+topHeader::topHeader(QWidget *p)
+        :QWidget(p)
 {
-    setFixedHeight(151);
+    setFixedHeight(50);
 }
 
-void TopHeader::paintEvent ( QPaintEvent * /*event*/ )
+void topHeader::paintEvent ( QPaintEvent * /*event*/ )
 {
-    QPainter p(this);
-    p.fillRect(rect(), QBrush(qApp->palette().window() ));
+  QPainter p(this);
+  p.fillRect(rect(), QBrush(qApp->palette().window() ));
 
-   QLinearGradient headerBackgroundGrd(0,0, 0,100);
-   headerBackgroundGrd.setColorAt(0, QColor(115,115,115));
-   headerBackgroundGrd.setColorAt(1, QColor(65,65,65));
-   //headerBackgroundGrd.setColorAt(0, QColor(252,252,252));
-   //headerBackgroundGrd.setColorAt(0.5, QColor(220,220,220));
-   //headerBackgroundGrd.setColorAt(0.51, QColor(193,193,193));
-   //headerBackgroundGrd.setColorAt(1, QColor(225,225,225));
-   //headerBackgroundGrd.setColorAt(0, QColor(200,201,201));
-   //headerBackgroundGrd.setColorAt(1, QColor(128,128,131));
+  QLinearGradient headerBackgroundGrd(0,0, 0,100);
+  headerBackgroundGrd.setColorAt(0, QColor(217,217,217));
+  headerBackgroundGrd.setColorAt(1, QColor(164,164,164));
+  p.fillRect(QRect(0,0,width(),200), QBrush(headerBackgroundGrd));
 
-   p.fillRect(QRect(0,0,width(),151), QBrush(headerBackgroundGrd));
-   p.drawPixmap(0,0,QPixmap(":/img/Logom.png"));
+
+  QFont font("Times", 14, QFont::Bold, true);
+  p.setFont(font);
+  p.setPen(QColor(255,255,255));
+  p.drawText(rect(), Qt::AlignBottom | Qt::AlignRight, tr("myFinances v1.0"));;
 }

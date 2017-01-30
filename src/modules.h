@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,23 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef MODULES_H
+#define MODULES_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QMap>
+#include "module.h"
 
-int main(int argc, char *argv[])
-{
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+class Modules {
+public:
+  Modules(ModuleParams *params);
+  ~Modules();
+  void loadModules();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+private:
+  ModuleParams *m_p;
+  QMap<QString, Module*> m_lModules;
 
-  delete finance;
-  return code;
-}
+  void _registerModule(const QString& name, Module *module);
+};
 
+#endif // MODULES_H

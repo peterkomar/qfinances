@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,39 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef MODULE_H
+#define MODULE_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QObject>
+#include <QtWidgets/QStackedWidget>
+#include <QDebug>
+#include "navpanel.h"
+#include "database.h"
+#include "navigationwidget.h"
+#include "properties.h"
 
-int main(int argc, char *argv[])
+struct ModuleParams {
+  NavigationWidget *m_navPanel;//left navigation panel
+  QStackedWidget *m_mainWidget;//Main widget which contains modules tables
+  DataBase *m_db;//handler to work with database
+  NavPanelItemGroup *m_cfg;//Management section
+  Properties *m_properties;//Properties panel
+};
+
+class Module : public QObject
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    Module(ModuleParams *params);
+    virtual ~Module();
+    virtual void exec();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+protected:
+  ModuleParams *m_p;
 
-  delete finance;
-  return code;
-}
+  virtual void _install() = 0;
 
+  void _installData(const QString& name);
+};
+
+#endif // MODULE_H

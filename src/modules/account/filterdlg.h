@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,62 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef FILTERDLG_H
+#define FILTERDLG_H
 
-#include <QTranslator>
+#include <QDialog>
 
-#include "financesapp.h"
-#include "finances.h"
+class Filter;
+class TreeComboBox;
+class QCheckBox;
+class QDateTimeEdit;
+class QComboBox;
+class QLineEdit;
+class QGridLayout;
+class DataBase;
 
-int main(int argc, char *argv[])
+class FilterDlg : public QDialog
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    FilterDlg(Filter *filter, DataBase *db);
+    ~FilterDlg();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+public slots:
+    void slotFilter();
+    void slotValue1Mod(const QString& text);
+    void slotValue2Mod(const QString& text);
 
-  delete finance;
-  return code;
-}
+signals:
+    void filter();
 
+private:
+    Filter *m_filter;
+    DataBase *m_db;
+
+    QCheckBox *ui_dateFilter;
+    QDateTimeEdit *ui_dateTimeFrom;
+    QDateTimeEdit *ui_dateTimeTo;
+
+    QCheckBox *ui_valueFilter;
+    QComboBox *ui_value1Mod;
+    QLineEdit *ui_value1;
+    QComboBox *ui_value2Mod;
+    QLineEdit *ui_value2;
+
+    QCheckBox *ui_categoryFilter;
+    TreeComboBox *ui_categoryCombo;
+
+    QCheckBox *ui_commetFilter;
+    QLineEdit *ui_comment;
+
+    void setupUI();
+    void setupDateFilter(QGridLayout *);
+    void setupValueFilter(QGridLayout *);
+    void setupCategoryFilter(QGridLayout *);
+    void setupCommentFilter(QGridLayout *);
+
+    void data();
+};
+
+#endif // FILTERDLG_H

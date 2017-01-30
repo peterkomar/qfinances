@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,39 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include <QHeaderView>
 
-#include <QTranslator>
+#include "transactionsview.h"
+#include "transaction.h"
+#include "account.h"
+#include "filter.h"
 
-#include "financesapp.h"
-#include "finances.h"
-
-int main(int argc, char *argv[])
+TransactionsView::TransactionsView(QWidget *parent)
+    : QTableView(parent)
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
-
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
-
-  delete finance;
-  return code;
+    setSelectionBehavior(QAbstractItemView::SelectRows);
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    horizontalHeader()->setStretchLastSection(true);
+    setAlternatingRowColors(true);
+    verticalHeader()->setDefaultSectionSize(20);
 }
 
+TransactionsView::~TransactionsView()
+{
+    delete ((Transaction*)model());
+}
+
+void TransactionsView::reload()
+{
+    reset();
+    ((Transaction*)model())->read();
+}
+
+void TransactionsView::loadTransactions(Account *account, Filter *filter)
+{
+    Transaction *transaction = new Transaction(account->m_db, account);
+    transaction->setFilter(filter);
+    setModel(transaction);
+    resizeColumnsToContents();
+    horizontalHeader()->resizeSection(2, horizontalHeader()->sectionSize(2) + 5);
+}

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef TREECOMBOBOX_H
+#define TREECOMBOBOX_H
 
-#include <QTranslator>
+#include <QComboBox>
 
-#include "financesapp.h"
-#include "finances.h"
+class QTreeView;
 
-int main(int argc, char *argv[])
+class TreeComboBox : public  QComboBox
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    explicit TreeComboBox(QWidget *parent = 0);
+    virtual void showPopup();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+    void selectItem(int id);
 
-  delete finance;
-  return code;
-}
+public slots:
+      void selectIndex(const QModelIndex&);
+      void slotIndexChanged();
+private:
+      QTreeView* m_treeView;
 
+      QModelIndex findItemIndex(int id, const QModelIndex& index) const;
+};
+
+#endif // TREECOMBOBOX_H

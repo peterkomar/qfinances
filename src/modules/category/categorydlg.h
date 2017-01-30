@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,39 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef CATEGORYDLG_H
+#define CATEGORYDLG_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include "dialog.h"
 
-int main(int argc, char *argv[])
+class Category;
+
+class QComboBox;
+class QLineEdit;
+class QTextEdit;
+
+class CategoryDlg : public Dialog
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+  Q_OBJECT
+public:
+  explicit CategoryDlg(Category *category, QWidget *parent = 0);
+  ~CategoryDlg();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+protected slots:
+  void slot_save();
 
-  delete finance;
-  return code;
-}
+private:
+  Category *m_category;
 
+  QComboBox *m_uiType;
+  QComboBox *m_parentCategories;
+  QLineEdit *m_uiName;
+  QLineEdit *m_uiTax;
+  QLineEdit *m_uiValue;
+  QTextEdit *m_uiComment;
+
+  void _gui(QGridLayout *layout);
+  void _data();
+};
+
+#endif // CATEGORYDLG_H

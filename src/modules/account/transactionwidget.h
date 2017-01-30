@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,62 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef TRANSACTIONWIDGET_H
+#define TRANSACTIONWIDGET_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QWidget>
+#include <QMap>
 
-int main(int argc, char *argv[])
+#include "../../modulewidget.h"
+
+class QPushButton;
+class QHBoxLayout;
+class QVBoxLayout;
+class QToolButton;
+class Filter;
+class QTreeWidgetItem;
+class Account;
+class TransactionsView;
+class Transaction;
+class AccountInfo;
+
+class TransactionWidget : public ModuleWidget
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    TransactionWidget(ModuleParams *params);
+    ~TransactionWidget();
+    
+signals:
+    
+public slots:
+    void slotFilterCheck();
+    void slotCustomFilter();
+    void slotDoFilter();
+    void slotSetAccount(QTreeWidgetItem* );
+    void slotSetProperties();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+    void slotNew();
+    void slotRevert();
+    void slotView();
 
-  delete finance;
-  return code;
-}
+protected:
+    virtual void topPanel(QVBoxLayout *layout);
+    virtual void mainPanel(QVBoxLayout *layout);
+    virtual void bottomPanel(QVBoxLayout *layout);
 
+private:
+    QPushButton* createFiterButton(const QString& text, int property, const char* group, bool bChecked=false);
+
+    Transaction* getSelectedTransaction();
+    void stopAccountInfo();
+    void loadAccountInfo();
+
+    QMap<QString, QPushButton*> m_filterPanelGroups;
+    Filter *m_filter;
+    TransactionsView *m_view;
+    Account *m_account;
+    AccountInfo *m_thread;
+};
+
+#endif // TRANSACTIONWIDGET_H

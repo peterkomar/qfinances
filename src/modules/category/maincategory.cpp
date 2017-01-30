@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,49 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#include "maincategory.h"
+#include "categorywidget.h"
+#include "category.h"
+#include "../account/filter.h"
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QFile>
 
-int main(int argc, char *argv[])
+MainCategory::MainCategory(ModuleParams *params)
+    : Module(params)
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
-
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
-
-  delete finance;
-  return code;
 }
 
+void MainCategory::exec()
+{
+    Module::exec();
+
+    CategoryWidget *panel = new CategoryWidget(m_p);
+    panel->gui();
+
+    int index= m_p->m_mainWidget->addWidget(panel);
+    m_p->m_cfg->addItem(QPixmap(":pictures/category.png"), tr("Categories"), index);
+}
+
+void MainCategory::_install()
+{
+    QStringList list = m_p->m_db->db()->tables();
+    if( list.contains("categories") ) {
+        return;
+    }
+
+    QSqlQuery *q = m_p->m_db->query();
+    q->prepare(
+        "CREATE TABLE categories ("
+          "id int,"
+          "parent_id int,"
+          "name varchar,"
+          "description varcchar,"
+          "type int,"
+          "tax double,"
+          "value double,"
+          "status int"
+        ")"
+    );
+    m_p->m_db->exec(q);    
+    this->_installData("categories");
+}

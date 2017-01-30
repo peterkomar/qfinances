@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,41 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef FNCDIALOG_H
+#define FNCDIALOG_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QDialog>
+#include <QFrame>
+#include <QGridLayout>
+#include <QFormLayout>
 
-int main(int argc, char *argv[])
+class Model;
+
+class Dialog : public QDialog
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    explicit Dialog(QWidget *parent = 0, bool readOnly = false);
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+    int dialog();
 
-  delete finance;
-  return code;
-}
+protected slots:
+    virtual void slot_save() = 0;
 
+protected:
+    virtual void _gui(QGridLayout *layout) = 0;
+    virtual void _data() = 0;
+    virtual void _readOnly() {}
+
+    void addLine(QGridLayout *dialogLayout, int width = 100);
+    void addLine(QFormLayout *formLayout, int width = 100);
+    void addSpacer(QGridLayout *dialogLayout);
+    void addSpacer(QFormLayout *formLayout);
+    QFormLayout* getFormLayout();
+
+    void saveData(Model *model);
+
+    bool isReadOnly;
+};
+
+#endif // FNCDIALOG_H

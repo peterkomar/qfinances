@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef FINANCESAPP_H
+#define FINANCESAPP_H
 
-#include <QTranslator>
+#include <QApplication>
 
-#include "financesapp.h"
-#include "finances.h"
-
-int main(int argc, char *argv[])
+class FinancesApp : public QApplication
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+public:
+    FinancesApp(int &argc, char **argv, int = ApplicationFlags);
+    bool notify(QObject* receiver, QEvent* even);
+};
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
-
-  delete finance;
-  return code;
-}
-
+#endif // FINANCESAPP_H

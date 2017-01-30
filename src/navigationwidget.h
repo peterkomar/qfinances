@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,48 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef FNCACCOUNTWIDGET_H
+#define FNCACCOUNTWIDGET_H
 
-#include <QTranslator>
-
-#include "financesapp.h"
-#include "finances.h"
-
-int main(int argc, char *argv[])
+#include <QTreeWidget>
+#include <QMap>
+class NavigationItem;
+class NavigationGroup : public QTreeWidgetItem
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+public:
+    explicit NavigationGroup(int indexModule, QTreeWidget * parent, int type);
+    void addItem(int indexItem, const QPixmap& icon, const QString& text);
+    void removeItem(int indexItem);
+    int indexModule() { return i_indexModule; }
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+private:
+    int i_indexModule;
+    QMap<int, NavigationItem*> m_items;
+};
 
-  delete finance;
-  return code;
-}
+class NavigationItem : public QTreeWidgetItem
+{
+public:
+    explicit NavigationItem(int indexItem, NavigationGroup * parent);
+    int indexItem() { return i_indexItem; }
 
+private:
+    int i_indexItem;
+};
+
+class NavigationWidget : public QTreeWidget
+{
+    Q_OBJECT
+public:
+    enum NAvigationTypes {TYPE_GROUP = 2, TYPE_ITEM};
+    explicit NavigationWidget(QWidget *parent = 0);
+    ~NavigationWidget();
+
+    NavigationGroup* addItemGroup(const QString& name, int indexModule);
+
+signals:
+
+public slots:
+};
+
+#endif // FNCACCOUNTWIDGET_H

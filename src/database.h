@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,54 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef DATABASE_H
+#define DATABASE_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QVariant>
+#include <QSqlError>
+#include <QSqlRecord>
+#include <QSqlTableModel>
+#include <QSqlQueryModel>
 
-int main(int argc, char *argv[])
+#include "project.h"
+
+class DataBase
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+public:
+  enum Setting {Account=15, Password=50, DefaultBill = 10};
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+  DataBase(const QString& dbName, const QString& password );
+  ~DataBase();
+  void login();
+  void logout();
 
-  delete finance;
-  return code;
-}
+  QSqlQuery* query();
+  void exec(QSqlQuery* query);
+  QSqlDatabase* db();
 
+  void setSettingValue( Setting code, const QString& value );
+  QString getSettingValue( Setting code );
+
+  void setAppSettingValue( const QString& code, const QVariant& value );
+  QVariant getAppSettingValue( const QString& code );
+
+  static QStringList listAccounts();
+  int nextId(const QString& table);
+
+private:  
+  void setup();
+  void initV1();
+  void open();
+
+  QByteArray _encrypt(const QString str);
+  QString _lastQuery(QSqlQuery* query);
+
+  static QString getHomeDirPath();
+
+  QSqlDatabase *m_db;
+  QSqlTableModel *m_settings;
+};
+
+#endif // DATABASE_H

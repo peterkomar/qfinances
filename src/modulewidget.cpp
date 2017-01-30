@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,50 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#include "modulewidget.h"
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QVBoxLayout>
+#include <QToolButton>
 
-int main(int argc, char *argv[])
+ModuleWidget::ModuleWidget(ModuleParams *p) :
+  QWidget(p->m_mainWidget->parentWidget())
+  ,m_grid(0)
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    m_db = p->m_db;
+    m_properties = p->m_properties;
+}
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+ModuleWidget::~ModuleWidget()
+{
+    if(  m_grid != 0 ) {
+        delete m_grid;
+    }
+}
 
-  delete finance;
-  return code;
+void ModuleWidget::gui()
+{
+    QVBoxLayout *pvbxLayout = new QVBoxLayout();
+
+    topPanel(pvbxLayout);
+    mainPanel(pvbxLayout);
+    bottomPanel(pvbxLayout);
+
+    pvbxLayout->setMargin(0);
+    setLayout(pvbxLayout);
+}
+
+QToolButton* ModuleWidget::createToolButton(const QString& text, const QString& toolTip, const char* icon)
+{
+    QToolButton *button = new QToolButton();
+    button->setText(text);
+    button->setIcon(QIcon(icon));
+    button->setIconSize(QSize(48,48));
+    button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    button->setToolTip(toolTip);
+    button->setStatusTip(button->toolTip());
+    button->setFocusPolicy(Qt::NoFocus);
+    button->setAutoRaise(true);
+
+    return button;
 }
 

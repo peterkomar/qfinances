@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,24 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef TRANSACTIONSVIEW_H
+#define TRANSACTIONSVIEW_H
 
-#include <QTranslator>
+#include <QObject>
+#include <QTableView>
 
-#include "financesapp.h"
-#include "finances.h"
+class Account;
+class Filter;
 
-int main(int argc, char *argv[])
+class TransactionsView : public QTableView
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    TransactionsView(QWidget *parent = Q_NULLPTR);
+    ~TransactionsView();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+    void reload();
+    void loadTransactions(Account *account, Filter* filter);
+};
 
-  delete finance;
-  return code;
-}
-
+#endif // TRANSACTIONSVIEW_H

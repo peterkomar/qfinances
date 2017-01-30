@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2017 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,41 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef TRANSFERDLG_H
+#define TRANSFERDLG_H
 
-#include <QTranslator>
+#include "dialog.h"
+#include "database.h"
+#include "transaction.h"
 
-#include "financesapp.h"
-#include "finances.h"
+class QRadioButton;
+class QDateTimeEdit;
+class QLineEdit;
+class QTextEdit;
+class QComboBox;
 
-int main(int argc, char *argv[])
+class TransferDlg : public Dialog
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    TransferDlg(Transaction *transaction, QWidget *parent = 0);
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+protected slots:
+    void slot_save();
 
-  delete finance;
-  return code;
-}
+private:
+    QRadioButton *m_uiFrom;
+    QRadioButton *m_uiTo;
+    QDateTimeEdit *m_uiDate;
+    QLineEdit *m_uiAmount;
+    QLineEdit *m_uiRate;
+    QTextEdit *m_uiComment;
+    QComboBox *m_uiAccount;
 
+    Transaction *m_transaction;
+
+    void _gui(QGridLayout *layout);
+    void _data();
+};
+
+#endif // TRANSFERDLG_H

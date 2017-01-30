@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,36 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef CURRENCYDLG_H
+#define CURRENCYDLG_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include "dialog.h"
 
-int main(int argc, char *argv[])
+class Currency;
+class QLineEdit;
+class QDoubleSpinBox;
+
+class CurrencyDlg : public Dialog
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    CurrencyDlg(Currency *currency, QWidget *parent = 0);
+    ~CurrencyDlg();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+protected slots:
+  void slot_save();
 
-  delete finance;
-  return code;
-}
+private:
+  Currency *m_currency;
 
+  QLineEdit *ui_name;
+  QLineEdit *ui_code;
+  QLineEdit *ui_symbolLeft;
+  QLineEdit *ui_symbolRight;
+  QDoubleSpinBox *ui_curs;
+
+  void _gui(QGridLayout *layout);
+  void _data();
+};
+
+#endif // CURRENCYDLG_H

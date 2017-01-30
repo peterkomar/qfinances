@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,37 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#include "modules.h"
 
-#include "financesapp.h"
-#include "finances.h"
+//include account plugin
+#include "modules/account/mainaccount.h"
+#include "modules/currency/maincurrency.h"
+#include "modules/category/maincategory.h"
 
-int main(int argc, char *argv[])
+Modules::Modules(ModuleParams *params)
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
-
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
-
-  delete finance;
-  return code;
+  m_p = params;
 }
 
+Modules::~Modules()
+{
+    m_lModules.clear();
+}
+
+void Modules::loadModules()
+{
+    //Register system modules
+    _registerModule("category", new MainCategory(m_p));
+    _registerModule("currency", new MainCurrency(m_p));
+    _registerModule("account", new MainAccount(m_p));
+
+    //Add Your modules here
+    // for example:
+    // _registerModule("module_name", new myModule(m_p));
+}
+
+void Modules::_registerModule(const QString& name, Module *module)
+{
+    module->exec();
+    m_lModules.insert(name, module);
+}

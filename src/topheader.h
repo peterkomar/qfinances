@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,10 +23,10 @@
 
 #include <QtWidgets/QWidget>
 
-class TopHeader : public QWidget
+class topHeader : public QWidget
 {
 public:
-    TopHeader(QWidget *p = 0);
+    topHeader(QWidget *p = 0);
 protected:
         void paintEvent ( QPaintEvent * event );
 };

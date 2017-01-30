@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2014 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,42 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef MODULEWIDGET_H
+#define MODULEWIDGET_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QWidget>
+#include "grid.h"
+#include "module.h"
 
-int main(int argc, char *argv[])
+class QToolButton;
+class QVBoxLayout;
+
+class ModuleWidget : public QWidget
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
+public:
+    ModuleWidget(ModuleParams *params);
+    ~ModuleWidget();
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+    enum{ BTN_NEW, BTN_EDIT };
 
-  delete finance;
-  return code;
-}
+    void gui();
+    
+signals:
+    
+public slots:
 
+protected:
+    QToolButton* createToolButton(const QString& text, const QString& toolTip, const char* icon);
+
+    virtual void topPanel(QVBoxLayout *layout) = 0;
+    virtual void mainPanel(QVBoxLayout *layout) = 0;
+    virtual void bottomPanel(QVBoxLayout *layout) = 0;
+
+    Grid *m_grid;
+
+    DataBase *m_db;
+    Properties *m_properties;
+};
+
+#endif // MODULEWIDGET_H

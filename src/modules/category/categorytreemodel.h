@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2015 by Peter Komar                                     *
+ *   Copyright (C) 2016 by Peter Komar                                     *
  *   udldevel@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,25 +18,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QTranslator>
+#ifndef CATEGORYTREEMODEL_H
+#define CATEGORYTREEMODEL_H
 
-#include "financesapp.h"
-#include "finances.h"
+#include <QAbstractItemModel>
+#include <QModelIndex>
+#include <QVariant>
+#include "model.h"
 
-int main(int argc, char *argv[])
+class CategoryItem;
+
+class CategoryTreeModel : public QAbstractItemModel
 {
-  Q_INIT_RESOURCE(application);
-  FinancesApp app(argc, argv);
-  app.setStyle("fusion");
+    Q_OBJECT
 
-  Finances *finance = new Finances();
-  finance->setWindowIcon(QIcon(":/pictures/myfinances2.png"));
-  int code = 0;
-  if( finance->login() ) {
-      code = app.exec();
-  }
+public:
+    CategoryTreeModel(Models list, QObject *parent = 0);
+    ~CategoryTreeModel();
 
-  delete finance;
-  return code;
-}
+    bool setData(const QModelIndex &index, const QVariant &value, int role) Q_DECL_OVERRIDE;
+    QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
+    Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+    QModelIndex index(int row, int column,
+                      const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+    QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
+private:
+    CategoryItem *m_rootItem;
+    CategoryItem *m_selectedItem;
+
+    void loadData(Models data);
+};
+
+#endif // CATEGORYTREEMODEL_H
