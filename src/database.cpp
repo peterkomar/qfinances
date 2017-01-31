@@ -31,7 +31,7 @@
 #include <QSqlTableModel>
 
 const char* APP_KEY = "UDLApp";
-const char* APP_NAME = "myFinances";
+const char* APP_NAME = "QFinances";
 
 DataBase::DataBase(const QString& dbName, const QString& password)
 {
@@ -91,7 +91,7 @@ void DataBase::initV1()
 
 QString DataBase::getHomeDirPath()
 {
-    QString accounts_dir_name = "myfinances2";
+    QString accounts_dir_name = "qfinances";
 
     QDir home = QDir::home();
     if( !home.exists(accounts_dir_name) ) {

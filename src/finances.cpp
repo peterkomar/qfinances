@@ -38,7 +38,7 @@ Finances::Finances()
   :m_modules(NULL)
   ,m_bSuccessLogin(false)
 {  
-  setWindowTitle("myFinances");
+  setWindowTitle("QFinances");
 
   m_d = new ModuleParams;
   m_d->m_db = 0;
