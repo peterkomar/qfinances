@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
   forever {
       QSettings settings( PreferencesDlgImpl::company, PreferencesDlgImpl::key );
       QString s = settings.value("lang").toString();
-      QString s1 = documentsDir()+"lang";
+      QString s1 = resourcesDir()+"/lang";
 
       QTranslator *trans = new QTranslator;
       trans->load(s+".qm",s1);

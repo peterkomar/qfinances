@@ -215,7 +215,7 @@ void Finances::set_lang()
     QString s = settings.value("lang",QString("English")).toString();
 
     //QTranslator trans;
-    QString s1 = documentsDir()+"lang";
+    QString s1 = resourcesDir()+"/lang";
     qApp->removeTranslator(ltr);
     ltr->load(s+".qm",s1);
     qApp->installTranslator(ltr);
@@ -227,12 +227,12 @@ void Finances::set_lang()
     qApp->removeTranslator(qttr);
     qttr->load("qt_"+s.mid(0,2).toLower()+".qm",s1);
     qApp->installTranslator(qttr);
-	 
+
     //reload language help
-    s1 = documentsDir() + "doc/";
+    s1 = resourcesDir() + "/doc/";
     s1 += s;
     if (!QFile::exists(s1)) {
-         s1 = documentsDir()+"doc/English";
+         s1 = resourcesDir()+"/doc/English";
     }
 
     helpB->load_source(s1);
@@ -690,11 +690,11 @@ void Finances::create_dock_widgets()
     dock3->setTitleBarWidget(title3);
 
     QSettings settings(PreferencesDlgImpl::company, PreferencesDlgImpl::key);
-    QString s1 = documentsDir()+"doc/";
+    QString s1 = resourcesDir()+"/doc/";
     s1 += settings.value("lang",QString("English")).toString();
 
     if (!QFile::exists(s1)) {
-        s1 = documentsDir()+"doc/English";
+        s1 = resourcesDir()+"/doc/English";
     }
 
     helpB = new HelpBrowser(dock3);

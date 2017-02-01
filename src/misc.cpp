@@ -25,6 +25,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QDir>
+#include <QApplication>
 
 //btype - connect to account or currency
 bool connectDB(QString const& dbName, const QString& user, const QString& passwrd, bool btype)
@@ -110,4 +111,16 @@ QString stringFromResource(const QString &resName)
 	file.open(QIODevice::ReadOnly | QIODevice::Text);
 	QTextStream ts(&file);
 	return ts.readAll();
+}
+
+QString resourcesDir()
+{
+#if defined(Q_OS_MAC)
+    QDir dir(QApplication::applicationDirPath());
+    dir.cdUp();
+    dir.cd("Resources");
+    return dir.absolutePath();
+#else
+    return documentsDir();
+#endif
 }

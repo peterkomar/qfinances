@@ -130,7 +130,7 @@ PreferencesDlgImpl::PreferencesDlgImpl(bool bfirs_show, QWidget *parent)
         
     listc.clear();
     
-    QDir dir(documentsDir()+"lang");
+    QDir dir(resourcesDir()+"/lang");
     dir.setNameFilters(QStringList () << "*.qm");
     QFileInfoList list = dir.entryInfoList();
     QStringList list1;

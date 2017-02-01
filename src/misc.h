@@ -30,6 +30,8 @@ QString documentsDir();
 
 QString appDir();
 
+QString resourcesDir();
+
 QString stringFromResource(const QString &resName);
 
 #endif

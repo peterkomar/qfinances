@@ -42,23 +42,30 @@ HEADERS += finances.h \
     querytable.h \
     accountpanelimpl.h
 RESOURCES += application.qrc
-RC_FILE = winicon.rc
 QT += widgets sql printsupport
 TRANSLATIONS += lang/Ukrainian.ts \
  lang/German.ts \
  lang/Russian.ts
 
-target.path = ../../QFinances
-documentation.path = ../../QFinances/doc
+win32{
+  RC_FILE = winicon.rc
+}
+
+INSTALL_DIR = $$system( echo $HOME/QFinances )
+target.path = $$INSTALL_DIR
 documentation.files = doc/*
-translation.path = ../../QFinances/lang
 translation.files = lang/*.qm
-data_css.path = ../../QFinances
-data_css.files = data/*.*
+macx: {
+  documentation.path = $$INSTALL_DIR/qfinances.app/Contents/Resources/doc
+  translation.path = $$INSTALL_DIR/qfinances.app/Contents/Resources/lang
+}
+else: {
+  documentation.path = $$INSTALL_DIR/doc
+  translation.path = $$INSTALL_DIR/lang
+}
 
 INSTALLS += target \
     documentation \
-    data_css \
     translation
 
 FORMS += \
