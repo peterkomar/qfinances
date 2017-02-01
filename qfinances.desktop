@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=My Finances
-Comment=Program for home bookkeeping
-Exec=finances
-Icon=finances
-Terminal=false
-Type=Application
-Categories=Office;
-StartupNotify=false
