@@ -24,6 +24,7 @@
 #include "filter.h"
 #include "navigationwidget.h"
 #include "transactiondlg.h"
+#include "transferdlg.h"
 #include "transaction.h"
 #include "account.h"
 #include "transactionsview.h"
@@ -93,11 +94,11 @@ void TransactionWidget::bottomPanel(QVBoxLayout *layout)
     phbxLayout->setAlignment(Qt::AlignLeft);
 
     QMenu *createMenu = new QMenu;
-    createMenu->addAction(tr("Transfer"), this, &TransactionWidget::slotNew);
+    createMenu->addAction(tr("Transfer"), this, &TransactionWidget::slotTransfer);
 
     QToolButton *newBtn = createToolButton(tr("New"), tr("Add new transaction"), ":pictures/new.png");
     newBtn->setMenu(createMenu);
-    connect(newBtn, SIGNAL(clicked()), this, SLOT(slotNew()));
+    connect(newBtn, &QToolButton::clicked, this, &TransactionWidget::slotNew);
     phbxLayout->addWidget(newBtn);
 
     QToolButton *revertBtn = createToolButton(tr("Revert"), tr("Revert last  transaction"), ":pictures/revert.png");
@@ -266,6 +267,22 @@ void TransactionWidget::slotNew()
         } else {
             QMessageBox::critical(this, tr("Transaction"), m_account->lastErrorMessage());
         }       
+    }
+    delete dlg;
+    delete transaction;
+}
+
+void TransactionWidget::slotTransfer()
+{
+    Transaction* transaction = new Transaction(m_db, m_account);
+    TransferDlg *dlg = new TransferDlg(transaction);
+    if( QDialog::Accepted == dlg->dialog() ) {
+
+        if(m_account->addTransfer(transaction, dlg->getRelatedAccountId(), dlg->getRate())) {
+            slotDoFilter();
+        } else {
+            QMessageBox::critical(this, tr("Transaction"), m_account->lastErrorMessage());
+        }
     }
     delete dlg;
     delete transaction;

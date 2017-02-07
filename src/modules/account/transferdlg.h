@@ -29,21 +29,28 @@ class QDateTimeEdit;
 class QLineEdit;
 class QTextEdit;
 class QComboBox;
+class QLabel;
 
 class TransferDlg : public Dialog
 {
     Q_OBJECT
 public:
     TransferDlg(Transaction *transaction, QWidget *parent = 0);
+    ~TransferDlg();
+
+    int getRelatedAccountId();
+    double getRate();
 
 protected slots:
     void slot_save();
+    void slotAccountChanged();
 
 private:
     QRadioButton *m_uiFrom;
     QRadioButton *m_uiTo;
     QDateTimeEdit *m_uiDate;
     QLineEdit *m_uiAmount;
+    QLabel *m_uiLabelRate;
     QLineEdit *m_uiRate;
     QTextEdit *m_uiComment;
     QComboBox *m_uiAccount;

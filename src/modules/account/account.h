@@ -47,6 +47,7 @@ public:
 
     bool addTransaction(Transaction *transaction);
     bool revertTransaction(Transaction *transaction);
+    bool addTransfer(Transaction *transaction, int accountId, double rate);
 
     Currency* currency();
     QString displayBalance();
@@ -94,6 +95,8 @@ public:
 
 private:
     QString encript(const QString& string);
+
+    double addTransaction(Transaction *transaction, double accountBalance);
 
     Currency *m_currency;
 

@@ -54,6 +54,7 @@ public slots:
     void slotSetProperties();
 
     void slotNew();
+    void slotTransfer();
     void slotRevert();
     void slotView();
 

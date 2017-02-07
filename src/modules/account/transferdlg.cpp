@@ -23,6 +23,14 @@
 #include "project.h"
 #include "account.h"
 #include "transaction.h"
+#include "../currency/currency.h"
+
+#include <QRadioButton>
+#include <QDateTimeEdit>
+#include <QLineEdit>
+#include <QTextEdit>
+#include <QComboBox>
+#include <QLabel>
 
 TransferDlg::TransferDlg(Transaction *transaction, QWidget *parent)
     :Dialog(parent)
@@ -35,10 +43,20 @@ TransferDlg::~TransferDlg()
     m_transaction = nullptr;
 }
 
+double TransferDlg::getRate()
+{
+    return m_uiRate->text().toDouble();
+}
+
+int TransferDlg::getRelatedAccountId()
+{
+    return m_uiAccount->currentData().toInt();
+}
+
 void TransferDlg::slot_save()
 {
     Transaction::Type type = Transaction::EXPENSES;
-    if(m_uiIncomes->isChecked()) {
+    if(m_uiFrom->isChecked()) {
         type = Transaction::INCOMES;
     }
     double amount = QLocale::system().toDouble(m_uiAmount->text());
@@ -49,7 +67,6 @@ void TransferDlg::slot_save()
 
     m_transaction->setDate(m_uiDate->dateTime());
     m_transaction->setValue(amount);
-    m_transaction->setCategoryId(m_uiCategory->currentData().toInt());
     m_transaction->setDescription(m_uiComment->toPlainText());
     m_transaction->setType(type);
     accept();
@@ -57,20 +74,19 @@ void TransferDlg::slot_save()
 
 void TransferDlg::_gui(QGridLayout *layout)
 {
-    m_uiExpences = new QRadioButton(tr("Expense"));
-    m_uiIncomes = new QRadioButton(tr("Income"));
+    m_uiFrom = new QRadioButton(tr("From"));
+    m_uiTo = new QRadioButton(tr("To"));
 
     QHBoxLayout *hlayout = new QHBoxLayout;
-    hlayout->addWidget(m_uiExpences);
-    hlayout->addWidget(m_uiIncomes);
+    hlayout->addWidget(m_uiFrom);
+    hlayout->addWidget(m_uiTo);
+
+    m_uiAccount = new QComboBox;
+    m_uiAccount->setMinimumWidth(150);
 
     m_uiDate = new QDateTimeEdit();
     m_uiDate->setMinimumWidth(150);
     m_uiDate->setCalendarPopup(true);
-
-    m_uiCategory = new TreeComboBox();
-    m_uiCategory->setMinimumWidth(150);
-    connect(m_uiCategory, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_categoryChanged()));
 
     m_uiAmount = new QLineEdit();
     QDoubleValidator *v = new QDoubleValidator;
@@ -78,17 +94,24 @@ void TransferDlg::_gui(QGridLayout *layout)
     m_uiAmount->setValidator(v);
     m_uiAmount->setPlaceholderText(m_transaction->displayValue().remove("+"));
 
+    m_uiLabelRate = new QLabel(tr("Rate:"));
+    m_uiLabelRate->setVisible(false);
+    m_uiRate = new QLineEdit();
+    m_uiRate->setValidator(v);
+    m_uiRate->setVisible(false);
+
     m_uiComment = new QTextEdit();
     m_uiComment->setMinimumWidth(300);
 
-
+    //Layouts
     QGridLayout *gl = new QGridLayout;
     gl->setContentsMargins(20, 1, 5, 1);
     gl->addWidget(new QLabel(tr("Type:")), 0, 0, Qt::AlignRight);
     gl->addLayout(hlayout, 0, 1, Qt::AlignRight);
-    gl->addWidget(new QLabel(tr("Category:")), 1, 0, Qt::AlignRight);
-    gl->addWidget(m_uiCategory, 1, 1, Qt::AlignRight);
+
     layout->addLayout(gl, 0, 0, Qt::AlignRight | Qt::AlignTop);
+    gl->addWidget(new QLabel(tr("Account:")), 1, 0, Qt::AlignRight);
+    gl->addWidget(m_uiAccount, 1, 1, Qt::AlignRight);
     addLine(layout, 300);
 
     gl = new QGridLayout;
@@ -97,6 +120,8 @@ void TransferDlg::_gui(QGridLayout *layout)
     gl->addWidget(m_uiDate, 0, 1, Qt::AlignRight);
     gl->addWidget(new QLabel(tr("Amount:")), 1, 0, Qt::AlignRight);
     gl->addWidget(m_uiAmount, 1, 1, Qt::AlignRight);
+    gl->addWidget(m_uiLabelRate, 2, 0, Qt::AlignRight);
+    gl->addWidget(m_uiRate, 2, 1, Qt::AlignRight);
     layout->addLayout(gl, 2, 0, Qt::AlignRight | Qt::AlignTop);
     addLine(layout, 300);
 
@@ -105,22 +130,44 @@ void TransferDlg::_gui(QGridLayout *layout)
 
 void TransferDlg::_data()
 {
-    if (!isReadOnly) {
-        m_uiExpences->setChecked(true);
-    }
+    setWindowTitle(tr("Create Transfer"));
 
-    QString title = isReadOnly? tr("View Transaction") : tr("New Transaction");
-    setWindowTitle(title);
-
+    m_uiFrom->setChecked(true);
     m_uiComment->setPlaceholderText(tr("Comments"));
 
     m_uiDate->setDisplayFormat("yyyy-MM-dd hh:mm");
     m_uiDate->setDateTime(QDateTime::currentDateTime());
 
-    //load categories
-    Category *category = new Category(m_transaction->m_db);
-    category->condition()->order = "parent_id ASC";
-    category->condition()->where = "status = 1";
-    m_uiCategory->setModel(new CategoryTreeModel(category->items()));
-    delete category;
+    Account *account = new Account(m_transaction->m_db);
+    account->condition()->where = QString("status = %1 AND id <> %2")
+            .arg(Account::STATUS_ACTIVE)
+            .arg(m_transaction->accountId());
+    account->condition()->order = "name ASC";
+
+    Models list = account->items();
+    delete account;
+    while(!list.isEmpty()) {
+        Account *a = dynamic_cast<Account*>(list.takeFirst());
+        m_uiAccount->addItem(a->name() + " " + a->currency()->symbol(), a->id());
+        delete a;
+    }
+    qDeleteAll(list);
+
+    connect(m_uiAccount, SIGNAL(currentIndexChanged(int)), this, SLOT(slotAccountChanged()));
+    slotAccountChanged();
+}
+
+void TransferDlg::slotAccountChanged()
+{
+    int account_id = m_uiAccount->currentData().toInt();
+    Account *a = new Account(m_transaction->m_db, account_id);
+    if (!a->load()) {
+        return;
+    }
+
+    bool visible = a->currencyId() != m_transaction->account()->currencyId();
+    m_uiLabelRate->setVisible(visible);
+    m_uiRate->setVisible(visible);
+
+
 }

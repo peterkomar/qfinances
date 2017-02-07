@@ -91,7 +91,8 @@ void DataBase::initV1()
 
 QString DataBase::getHomeDirPath()
 {
-    QString accounts_dir_name = ".qfinances";
+    //QString accounts_dir_name = ".qfinances";
+    QString accounts_dir_name = "myfinances2";
 
     QDir home = QDir::home();
     if( !home.exists(accounts_dir_name) ) {

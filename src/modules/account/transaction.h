@@ -56,6 +56,7 @@ public:
     QDateTime date() const { return m_d.date; }    
 
     int accountId() { return m_d.account_id; }
+    Account* account() const { return m_account; }
 
     void setCategoryId(int id) { m_d.category_id = id; }
     int categoryId() { return m_d.category_id; }

@@ -100,4 +100,17 @@ void MainAccount::_install()
         );
         m_p->m_db->exec(q);
     }
+
+    if( !list.contains("transfers") ) {
+        QSqlQuery *q = m_p->m_db->query();
+        q->prepare(
+              "CREATE TABLE transfers ("
+                    "source_transaction_id int,"
+                    "destination_transaction_id int,"
+                    "rate double,"
+                    "created_at datetime"
+              ")"
+        );
+        m_p->m_db->exec(q);
+    }
 }

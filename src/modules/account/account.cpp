@@ -23,6 +23,7 @@
 #include "database.h"
 #include "../currency/currency.h"
 #include "project.h"
+#include "../category/category.h"
 #include <QObject>
 #include <QCryptographicHash>
 
@@ -57,39 +58,41 @@ void Account::setCurrencyId(int id) {
 
 bool Account::addTransaction(Transaction *transaction)
 {
-    double balance = m_d.balance;
-    if (transaction->isIncomes()) {
-        balance += transaction->value();
-    } else {
-        balance -= transaction->value();
-    }
-
-    try {
-        m_db->db()->transaction();
-
-        QSqlQuery *q = m_db->query();
-        q->prepare(""
-             "UPDATE "+table()+" SET "
-             "balance = :balance "
-             "WHERE id = :id"
-        );
-
-        q->bindValue(":id", m_d.id);
-        q->bindValue(":balance", balance);
-        m_db->exec(q);
-
-        transaction->setBalance(balance);
-        transaction->save();
-
-        m_d.balance = balance;
+   try {
+        m_db->db()->transaction();        
+        m_d.balance = addTransaction(transaction, m_d.balance);
         m_db->db()->commit();
-
     } catch(int code) {
         m_db->db()->rollback();
         m_error_message = QObject::tr("Can't add transaction");
         return false;
     }
     return true;
+}
+
+double Account::addTransaction(Transaction *transaction, double accountBalance)
+{
+    double balance = accountBalance;
+    if (transaction->isIncomes()) {
+        balance += transaction->value();
+    } else {
+        balance -= transaction->value();
+    }
+
+    QSqlQuery *q = m_db->query();
+    q->prepare(""
+        "UPDATE "+table()+" SET "
+        "balance = :balance "
+        "WHERE id = :id"
+    );
+
+    q->bindValue(":id", transaction->accountId());
+    q->bindValue(":balance", balance);
+    m_db->exec(q);
+
+    transaction->setBalance(balance);
+    transaction->save();
+    return balance;
 }
 
 bool Account::revertTransaction(Transaction *transaction)
@@ -125,6 +128,71 @@ bool Account::revertTransaction(Transaction *transaction)
         return false;
     }
     return true;
+}
+
+bool Account::addTransfer(Transaction *transaction, int accountId, double rate)
+{
+    Account* relatedAccount = new Account(m_db, accountId);
+    if(!relatedAccount->load()) {
+        delete relatedAccount;
+        return false;
+    }
+
+    Transaction *related = new Transaction(m_db, relatedAccount);
+    if (transaction->isIncomes()) {
+        related->setType(Transaction::EXPENSES);
+        related->setDescription(QObject::tr("Transfer to ") + m_d.name);
+        transaction->setDescription(QObject::tr("Transfer from ") + relatedAccount->name());
+    } else {
+        related->setType(Transaction::INCOMES);
+        related->setDescription(QObject::tr("Transfer from ") + m_d.name);
+        transaction->setDescription(QObject::tr("Transfer to ") + relatedAccount->name());
+    }
+
+    int category_id = 24;//transfer
+    double value = transaction->value();
+    if (rate > 0) {
+        category_id = 23;//exchenge
+        value *= rate;
+    }
+
+    related->setValue(value);
+    related->setDate(transaction->date());
+    related->setCategoryId(category_id);
+
+    transaction->setCategoryId(category_id);
+
+    bool result = false;
+    try {
+         m_db->db()->transaction();
+         double balance = addTransaction(transaction, m_d.balance);
+         addTransaction(related, relatedAccount->balance());
+
+         QSqlQuery *q = m_db->query();
+         q->prepare(""
+                    "INSERT INTO transfers"
+                    " (source_transaction_id, destination_transaction_id, rate, created_at)"
+                    " VALUES "
+                    "(:source_transaction_id, :destination_transaction_id, :rate, :created_at)"
+         );
+         q->bindValue(":source_transaction_id", transaction->id());
+         q->bindValue(":destination_transaction_id", related->id());
+         q->bindValue(":rate", rate);
+         q->bindValue(":created_at", transaction->date().toString(Qt::ISODate));
+         m_db->exec(q);
+
+         m_db->db()->commit();
+         m_d.balance = balance;
+         result = true;
+    } catch(int code) {
+        m_db->db()->rollback();
+        m_error_message = QObject::tr("Can't do transfer");
+    }
+
+    delete related;
+    delete relatedAccount;
+
+    return result;
 }
 
 bool Account::create()
