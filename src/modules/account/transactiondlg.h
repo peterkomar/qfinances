@@ -53,6 +53,8 @@ private:
 
     Transaction *m_transaction;
 
+    QString m_prevDescription;
+
     void _gui(QGridLayout *layout);
     void _data();
     void _readOnly();

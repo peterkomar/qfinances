@@ -38,6 +38,7 @@ TransactionDlg::TransactionDlg(Transaction *transaction, QWidget *parent, bool r
     :Dialog(parent, readOnly)
 {    
     m_transaction = transaction;
+    m_prevDescription = "";
 }
 
 TransactionDlg::~TransactionDlg()
@@ -159,11 +160,16 @@ void TransactionDlg::slot_categoryChanged()
     category->load();
 
     double value = category->value();
-    if (value > 0) {
+    if (value > 0 && m_uiAmount->text().isEmpty()) {
         m_uiAmount->setText(QString::number(value));
     }
 
-    m_uiComment->setText(category->description());
+    QString comment = m_uiComment->toPlainText();
+    if (comment.isEmpty() || comment == m_prevDescription) {
+        m_uiComment->setText(category->description());
+    }
+    m_prevDescription = category->description();
+
     if (category->type() == Transaction::INCOMES) {
         m_uiIncomes->setChecked(true);
     } else {
