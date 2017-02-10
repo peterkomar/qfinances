@@ -46,6 +46,17 @@ Transaction::Transaction(DataBase *db, Account *account, int id, QObject *parent
     initView();
 }
 
+Transaction* Transaction::clone(Account *account)
+{
+    Transaction* cloned = new Transaction(this->m_db, account? account : this->m_account);
+    cloned->setType(m_d.type);
+    cloned->setValue(m_d.value);
+    cloned->setDate(m_d.date);
+    cloned->setCategoryId(m_d.category_id);
+    cloned->setDescription(m_d.description);
+    return cloned;
+}
+
 Transaction::~Transaction()
 {
     m_filter = 0;

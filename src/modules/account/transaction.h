@@ -35,6 +35,7 @@ public:
     enum Type {BOTH=0, INCOMES, EXPENSES};
 
     Transaction(DataBase *m_db, Account *account, int id = 0, QObject *parent = Q_NULLPTR);
+    Transaction* clone(Account *account = nullptr);
     ~Transaction();
 
     bool canFetchMore(const QModelIndex &parent) const;

@@ -138,29 +138,17 @@ bool Account::addTransfer(Transaction *transaction, int accountId, double rate)
         return false;
     }
 
-    Transaction *related = new Transaction(m_db, relatedAccount);
-    if (transaction->isIncomes()) {
-        related->setType(Transaction::EXPENSES);
-        related->setDescription(QObject::tr("Transfer to ") + m_d.name);
-        transaction->setDescription(QObject::tr("Transfer from ") + relatedAccount->name());
-    } else {
-        related->setType(Transaction::INCOMES);
-        related->setDescription(QObject::tr("Transfer from ") + m_d.name);
-        transaction->setDescription(QObject::tr("Transfer to ") + relatedAccount->name());
-    }
-
     int category_id = 24;//transfer
     double value = transaction->value();
     if (rate > 0) {
         category_id = 23;//exchenge
         value *= rate;
     }
-
-    related->setValue(value);
-    related->setDate(transaction->date());
-    related->setCategoryId(category_id);
-
     transaction->setCategoryId(category_id);
+
+    Transaction *related = transaction->clone(relatedAccount);
+    related->setType(transaction->isIncomes()? Transaction::EXPENSES: Transaction::INCOMES);
+    related->setValue(value);
 
     bool result = false;
     try {
