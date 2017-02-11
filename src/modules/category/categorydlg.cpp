@@ -20,6 +20,7 @@
 
 #include "categorydlg.h"
 #include "category.h"
+#include "project.h"
 #include "../account/filter.h"
 
 #include <QMessageBox>
@@ -129,9 +130,14 @@ void CategoryDlg::_data()
 
     Models list = m_category->items();
     m_parentCategories->addItem("", 0);
+    int i = 0;
     while(!list.isEmpty()) {
         Category *c = dynamic_cast<Category*>(list.takeFirst());
-        m_parentCategories->addItem(c->name(), c->id());
+        m_parentCategories->insertItem(i, c->name(), c->id());
+        if (c->id() == m_category->parentId()) {
+            m_parentCategories->setCurrentIndex(i);
+        }
         delete c;
+        ++i;
     }
 }
