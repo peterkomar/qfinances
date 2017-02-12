@@ -154,6 +154,8 @@ void TransferDlg::_data()
     qDeleteAll(list);
 
     connect(m_uiAccount, SIGNAL(currentIndexChanged(int)), this, SLOT(slotAccountChanged()));
+    connect(m_uiFrom, SIGNAL(toggled(bool)), this, SLOT(slotAccountChanged()));
+    connect(m_uiTo, SIGNAL(toggled(bool)), this, SLOT(slotAccountChanged()));
     slotAccountChanged();
 }
 
@@ -165,9 +167,20 @@ void TransferDlg::slotAccountChanged()
         return;
     }
 
+    Currency *currency = nullptr;
+    if (m_uiFrom->isChecked()) {
+        currency = m_transaction->account()->currency();
+    } else {
+        currency = a->currency();
+    }
+
     bool visible = a->currencyId() != m_transaction->account()->currencyId();
     m_uiLabelRate->setVisible(visible);
     m_uiRate->setVisible(visible);
-
-
+    if (visible) {
+        m_uiRate->setText(QString::number(currency->rate()));
+    } else {
+        m_uiRate->setText("");
+    }
+    currency = nullptr;
 }
