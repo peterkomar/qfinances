@@ -92,7 +92,7 @@ void TransferDlg::_gui(QGridLayout *layout)
     QDoubleValidator *v = new QDoubleValidator;
     v->setDecimals(2);
     m_uiAmount->setValidator(v);
-    m_uiAmount->setPlaceholderText(m_transaction->displayValue().remove("+"));
+    m_uiAmount->setPlaceholderText(m_transaction->displayValue().remove(0,1));
 
     m_uiLabelRate = new QLabel(tr("Rate:"));
     m_uiLabelRate->setVisible(false);

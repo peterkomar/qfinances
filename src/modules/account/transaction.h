@@ -34,8 +34,9 @@ class Transaction : public Model, public QAbstractTableModel
 public:
     enum Type {BOTH=0, INCOMES, EXPENSES};
 
-    Transaction(DataBase *m_db, Account *account, int id = 0, QObject *parent = Q_NULLPTR);
-    Transaction* clone(Account *account = nullptr);
+    Transaction(DataBase *m_db, int id = 0, QObject *parent = Q_NULLPTR);
+    Transaction(DataBase *m_db, Account* account, QObject *parent = Q_NULLPTR);
+    Transaction* clone();
     ~Transaction();
 
     bool canFetchMore(const QModelIndex &parent) const;
@@ -57,7 +58,8 @@ public:
     QDateTime date() const { return m_d.date; }    
 
     int accountId() { return m_d.account_id; }
-    Account* account() const { return m_account; }
+    Account* account();
+    void setAccount(Account* account);
 
     void setCategoryId(int id) { m_d.category_id = id; }
     int categoryId() { return m_d.category_id; }
@@ -82,6 +84,7 @@ public:
     const QString table() { return QString("transactions"); }
     Model* model() { return new Transaction(m_db, 0); }
 
+    Transaction* related();
 
 private:
     void initView();
@@ -90,6 +93,7 @@ private:
     QStringList m_columns;
     QList<QStringList> m_records;
     Account *m_account;
+    bool b_account_autoload;
 
     struct {
         int id;

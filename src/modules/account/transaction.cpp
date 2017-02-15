@@ -28,39 +28,122 @@
 #include <QMessageBox>
 #include <QApplication>
 
-Transaction::Transaction(DataBase *db, Account *account, int id, QObject *parent)
+Transaction::Transaction(DataBase *db, int id, QObject *parent)
     :Model(db, id)
     ,QAbstractTableModel(parent)
     ,m_filter(0)
-    ,m_account(account)
-{   
-    m_d.account_id  = account->id();
+    ,m_account(nullptr)
+    ,b_account_autoload(false)
+{
+    m_d.account_id  = 0;
     m_d.balance     = 0.0;
     m_d.category_id = 0;
     m_d.date        = QDateTime::currentDateTime();
     m_d.description = "";
-    m_d.id          = id? id : 0;
-    m_d.type        = INCOMES;
+    m_d.id          = id;
+    m_d.type        = EXPENSES;
     m_d.value       = 0.0;
 
     initView();
 }
 
-Transaction* Transaction::clone(Account *account)
+Transaction::Transaction(DataBase *db, Account* account, QObject *parent)
+    :Model(db, 0)
+    ,QAbstractTableModel(parent)
+    ,m_filter(0)
+    ,m_account(account)
+    ,b_account_autoload(false)
 {
-    Transaction* cloned = new Transaction(this->m_db, account? account : this->m_account);
+    m_d.account_id  = account->id();
+    m_d.balance     = 0.0;
+    m_d.category_id = 0;
+    m_d.date        = QDateTime::currentDateTime();
+    m_d.description = "";
+    m_d.id          = 0;
+    m_d.type        = EXPENSES;
+    m_d.value       = 0.0;
+
+    initView();
+}
+
+Transaction* Transaction::related()
+{
+    QSqlQuery *q = m_db->query();
+    q->prepare(""
+               "SELECT "
+               " source_transaction_id,"
+               " destination_transaction_id "
+               "FROM transfers "
+               "WHERE "
+               " source_transaction_id = :id OR "
+               " destination_transaction_id = :id"
+    );
+
+    q->bindValue(":id", m_d.id);
+    m_db->exec(q);
+
+    if (!q->first()) {
+        return nullptr;
+    }
+
+    int sourceId = q->value(0).toInt();
+    int transactionId = q->value(1).toInt();
+    if (sourceId != m_d.id) {
+        transactionId = sourceId;
+    }
+    delete q;
+
+    Transaction* related = new Transaction(m_db, transactionId);
+    if(related->load()) {
+        return related;
+    }
+
+    delete related;
+    return nullptr;
+}
+
+Transaction* Transaction::clone()
+{
+    Transaction* cloned = new Transaction(m_db);
     cloned->setType(m_d.type);
     cloned->setValue(m_d.value);
     cloned->setDate(m_d.date);
     cloned->setCategoryId(m_d.category_id);
     cloned->setDescription(m_d.description);
+    cloned->setAccount(account());
     return cloned;
 }
 
 Transaction::~Transaction()
+{    
+    m_filter = nullptr;
+    if (b_account_autoload && m_account) {
+        delete m_account;
+    }
+    m_account = nullptr;
+}
+
+Account* Transaction::account()
 {
-    m_filter = 0;
-    m_account = 0;
+    if (!m_account) {
+        m_account = new Account(m_db, m_d.account_id);
+        if(!m_account->load()) {
+            throw QString("Can't load account %1").arg(m_d.account_id);
+        }
+        b_account_autoload = true;
+    }
+    return m_account;
+}
+
+void Transaction::setAccount(Account* account)
+{
+    if (m_account && b_account_autoload) {
+        delete m_account;
+        m_account = nullptr;
+        b_account_autoload = false;
+    }
+    m_account = account;
+    m_d.account_id = account->id();
 }
 
 void Transaction::setType(Type type)
@@ -88,6 +171,10 @@ void Transaction::fetch(QSqlQuery *q)
 
 bool Transaction::save()
 {
+    if (!m_d.account_id) {
+        throw "account not assigned";
+    }
+
     QSqlQuery *q = m_db->query();
 
     m_d.id = m_db->nextId(table());
@@ -213,7 +300,7 @@ void Transaction::read()
         return;
     }
 
-    Transaction tr(m_db, m_account);
+    Transaction tr(m_db, account());
     m_records.clear();
     while (q->next()) {
         tr.fetch(q);
@@ -241,7 +328,7 @@ void Transaction::setFilter(Filter *filter)
 
 QString Transaction::displayValue()
 {
-    QString value = m_account->currency()->displayPrice(m_d.value);
+    QString value = account()->currency()->displayPrice(m_d.value);
     if (isIncomes()) {
         value.prepend("+ ");
     } else {
@@ -252,6 +339,6 @@ QString Transaction::displayValue()
 
 QString Transaction::displayBalance()
 {
-    return m_account->currency()->displayPrice(m_d.balance);
+    return account()->currency()->displayPrice(m_d.balance);
 }
 

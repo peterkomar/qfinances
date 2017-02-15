@@ -97,37 +97,50 @@ double Account::addTransaction(Transaction *transaction, double accountBalance)
 
 bool Account::revertTransaction(Transaction *transaction)
 {
-    double balance = m_d.balance;
+    Transaction* related = nullptr;
+    try {
+        m_db->db()->transaction();
+
+        related = transaction->related();
+        m_d.balance = revertTransaction(transaction, m_d.balance);
+        if (related) {
+            revertTransaction(related, related->account()->balance());
+        }
+
+        m_db->db()->commit();
+    } catch(int code) {
+        m_db->db()->rollback();
+        m_error_message = QObject::tr("Can't revert transaction");
+        if (related) {
+            delete related;
+        }
+        return false;
+    }
+    return true;
+}
+
+double Account::revertTransaction(Transaction *transaction, double accountBalance)
+{
+    double balance = accountBalance;
     if (transaction->isIncomes()) {
         balance -= transaction->value();
     } else {
         balance += transaction->value();
     }
 
-    try {
-        m_db->db()->transaction();
+    QSqlQuery *q = m_db->query();
+    q->prepare(""
+        "UPDATE "+table()+" SET "
+        "balance = :balance "
+        "WHERE id = :id"
+    );
 
-        QSqlQuery *q = m_db->query();
-        q->prepare(""
-             "UPDATE "+table()+" SET "
-             "balance = :balance "
-             "WHERE id = :id"
-        );
+    q->bindValue(":id", transaction->accountId());
+    q->bindValue(":balance", balance);
+    m_db->exec(q);
 
-        q->bindValue(":id", m_d.id);
-        q->bindValue(":balance", balance);
-        m_db->exec(q);
-
-        transaction->revert();
-        m_d.balance = balance;
-        m_db->db()->commit();
-
-    } catch(int code) {
-        m_db->db()->rollback();
-        m_error_message = QObject::tr("Can't revert transaction");
-        return false;
-    }
-    return true;
+    transaction->revert();
+    return balance;
 }
 
 bool Account::addTransfer(Transaction *transaction, int accountId, double rate)
@@ -146,7 +159,8 @@ bool Account::addTransfer(Transaction *transaction, int accountId, double rate)
     }
     transaction->setCategoryId(category_id);
 
-    Transaction *related = transaction->clone(relatedAccount);
+    Transaction *related = transaction->clone();
+    related->setAccount(relatedAccount);
     related->setType(transaction->isIncomes()? Transaction::EXPENSES: Transaction::INCOMES);
     related->setValue(value);
 

@@ -97,6 +97,7 @@ private:
     QString encript(const QString& string);
 
     double addTransaction(Transaction *transaction, double accountBalance);
+    double revertTransaction(Transaction *transaction, double accountBalance);
 
     Currency *m_currency;
 
