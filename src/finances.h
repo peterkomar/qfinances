@@ -48,6 +48,7 @@ private slots:
 
   void slotClickBottomPanelItem(NavPanelItem *);
   void slotClickNavPanelItem(QTreeWidgetItem *);
+  void slotAbout();
 
 private:
   void _gui();
