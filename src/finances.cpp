@@ -23,6 +23,9 @@
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QLayout>
+#include <QAction>
+#include <QMenuBar>
+#include <QDateTime>
 
 #include "project.h"
 #include "finances.h"
@@ -70,14 +73,6 @@ void Finances::_gui()
   m_d->m_mainWidget = new QStackedWidget(this);
   m_d->m_mainWidget->addWidget(new QWidget);//add empty widget by default
 
-  //Init Top panel
-  /*QDockWidget *dockTop = new QDockWidget(this);
-  dockTop->setObjectName("Top");
-  dockTop->setFloating(false);
-  dockTop->setTitleBarWidget(new QWidget);
-  dockTop->setWidget(new topHeader);
-  addDockWidget(Qt::TopDockWidgetArea, dockTop);*/
-
   m_d->m_navPanel = new NavigationWidget(this);
   connect(m_d->m_navPanel, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(slotClickNavPanelItem(QTreeWidgetItem*)));
 
@@ -113,6 +108,11 @@ void Finances::_gui()
   addDockWidget(Qt::LeftDockWidgetArea, dockCfg);
 
   setCentralWidget(m_d->m_mainWidget);
+
+  QAction *a = new QAction(tr("About"), this);
+  QMenu *m = menuBar()->addMenu(tr("Help"));
+  m->addAction(a);
+  connect(a, SIGNAL(triggered()), this, SLOT(slotAbout()));
 
   //Remove spaces
   setStyleSheet(
@@ -176,5 +176,15 @@ void Finances::slotClickNavPanelItem(QTreeWidgetItem *item)
     NavigationGroup* group = static_cast<NavigationGroup*>(item->parent());
     m_d->m_mainWidget->setCurrentIndex(group->indexModule());
     ((NavPanel*)m_d->m_cfg->parent())->unseletCurrentItem();
+}
+
+void Finances::slotAbout()
+{
+    QMessageBox::about(this, "About", "<b>QFinances</b> - track manager home finances.<br/>"
+                       "<br/> "
+                       "Author <a href=\"http://peter_komar.byethost17.com/\">Peter Komar</a>"
+                       "<br/><br/><b>License:</b> GPL v2"
+                       "<br/> 2007 - " + QDateTime::currentDateTime().toString("yyyy") +
+                       "<br/><br/><b>Build </b>: 2.0." + QString::number(QDateTime::currentMSecsSinceEpoch()));
 }
 
