@@ -30,6 +30,7 @@
 #include "transactionsview.h"
 #include "accountinfo.h"
 #include "accountdlg.h"
+#include "transactionscharts.h"
 
 #include <QPushButton>
 #include <QToolButton>
@@ -39,11 +40,15 @@
 #include <QMenu>
 #include <QAction>
 
+
 TransactionWidget::TransactionWidget(ModuleParams *params)
     :ModuleWidget(params)
-    ,m_view(0)
-    ,m_account(0)
-    ,m_thread(0)
+    ,m_widget(nullptr)
+    ,m_view(nullptr)
+    ,m_account(nullptr)
+    ,m_thread(nullptr)
+    ,m_charts(nullptr)
+    ,viewModeBtn(nullptr)
 {
     m_filter = new Filter;
 }
@@ -51,7 +56,7 @@ TransactionWidget::TransactionWidget(ModuleParams *params)
 TransactionWidget::~TransactionWidget()
 {    
     stopAccountInfo();
-    delete m_view;
+    delete m_widget;
     delete m_filter;
     if (m_account) {
         delete m_account;
@@ -83,9 +88,14 @@ void TransactionWidget::topPanel(QVBoxLayout *layout)
 void TransactionWidget::mainPanel(QVBoxLayout *layout)
 {
     m_view = new TransactionsView();
-    layout->addWidget(m_view);
-
     connect(m_view, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(slotView()));
+
+    m_charts = new TransactionsCharts(this);
+
+    m_widget = new QStackedWidget;
+    m_widget->insertWidget(0, m_view);
+    m_widget->insertWidget(1, m_charts);
+    layout->addWidget(m_widget);
 }
 
 void TransactionWidget::bottomPanel(QVBoxLayout *layout)
@@ -115,10 +125,9 @@ void TransactionWidget::bottomPanel(QVBoxLayout *layout)
     //TODO: add connection here
     phbxLayout->addWidget(printBtn);
 
-    QToolButton *chartBtn = createToolButton(tr("Reports"), tr("View repors with charts  transactions"), ":pictures/view-statistics.png");
-    chartBtn->setEnabled(false);
-    //TODO: add connection here
-    phbxLayout->addWidget(chartBtn);
+    viewModeBtn = createToolButton(tr("Charts"), tr("View charts  transactions"), ":pictures/view-statistics.png");
+    connect(viewModeBtn, &QToolButton::clicked, this, &TransactionWidget::slotCharts);
+    phbxLayout->addWidget(viewModeBtn);
 
     layout->addLayout(phbxLayout);
 }
@@ -340,4 +349,16 @@ Transaction* TransactionWidget::getSelectedTransaction()
         transaction = nullptr;
     }
     return transaction;
+}
+
+void TransactionWidget::slotCharts()
+{
+    if (m_widget->currentIndex() == 0) {
+        viewModeBtn->setText(tr("List"));
+        m_widget->setCurrentIndex(1);
+    } else {
+        viewModeBtn->setText(tr("Charts"));
+        m_widget->setCurrentIndex(0);
+    }
+
 }

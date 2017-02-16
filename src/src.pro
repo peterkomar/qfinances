@@ -58,7 +58,7 @@ win32{
 macx: {
   ICON = pictures/myfinances2.icns
 }
-QT += widgets sql printsupport
+QT += widgets sql printsupport charts
 
 FORMS +=
 

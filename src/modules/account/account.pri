@@ -14,7 +14,8 @@ SOURCES += \
     $$PWD/transactionsview.cpp \
     $$PWD/filterdlg.cpp \
     $$PWD/accountinfo.cpp \
-    $$PWD/transferdlg.cpp
+    $$PWD/transferdlg.cpp \
+    $$PWD/transactionscharts.cpp
 
 HEADERS += \
     modules/account/transactionwidget.h \
@@ -28,4 +29,5 @@ HEADERS += \
     $$PWD/transactionsview.h \
     $$PWD/filterdlg.h \
     $$PWD/accountinfo.h \
-    $$PWD/transferdlg.h
+    $$PWD/transferdlg.h \
+    $$PWD/transactionscharts.h
