@@ -8,6 +8,7 @@ class Account;
 class Filter;
 
 typedef QMap <QString, QMap<QString, QString>> PropertiesInfo;
+typedef QMap<QString, double> CategoriesValues;
 
 class AccountInfo : public QThread
 {
@@ -24,17 +25,23 @@ signals:
       void resultReady();
 
 private:
-    void getDetails();
+    void collateDetails();
 
     double getSumTransactions(int type);
-    QMap<QString, QString> getTransactionsByCategories(int type);
+    QMap<QString, double> getTransactionsByCategories(int type);
 
     QString formatValue(double value);
 
     Account* m_account;
     Filter* m_filter;
 
-    PropertiesInfo m_properties;
+    struct {
+        double d_expenses;
+        double d_incomes;
+
+        CategoriesValues m_categoryExpenses;
+        CategoriesValues m_categoryIncomes;
+    } m_d;
 };
 
 #endif // ACCOUNTINFO_H

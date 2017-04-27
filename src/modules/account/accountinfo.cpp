@@ -18,39 +18,54 @@ AccountInfo::AccountInfo(Account *account, Filter *filter, QObject *parent)
 AccountInfo::~AccountInfo()
 {
     m_account = nullptr;
-    m_filter = nullptr;
-    m_properties.clear();
+    m_filter = nullptr;    
 }
 
 PropertiesInfo AccountInfo::getResults()
 {
-    return m_properties;
+    PropertiesInfo properties;
+
+    QMap<QString, QString> account;
+    account.insert(tr("Balance"), m_account->displayBalance());
+    properties.insert(tr("Account info"), account);
+
+    QMap<QString, QString> stats;
+    stats.insert(tr("Incomes"), formatValue(m_d.d_incomes));
+    stats.insert(tr("Expenses"), formatValue(m_d.d_expenses));
+    properties.insert(tr("Statistics"), stats);
+
+    stats.clear();
+    QMapIterator<QString, double> i(m_d.m_categoryExpenses);
+    while (i.hasNext()) {
+        i.next();
+        stats.insert(i.key(), formatValue(i.value()));
+    }
+    properties.insert(tr("Expenses by categories"), stats);
+
+    stats.clear();
+    QMapIterator<QString, double> j(m_d.m_categoryIncomes);
+    while (j.hasNext()) {
+        j.next();
+        stats.insert(j.key(), formatValue(j.value()));
+    }
+    properties.insert(tr("Incomes by categories"), stats);
+
+
+    return properties;
 }
 
 void AccountInfo::run()
 {
-    getDetails();
+    collateDetails();
+    emit resultReady();
 }
 
-void AccountInfo::getDetails()
+void AccountInfo::collateDetails()
 {
-    QMap<QString, QString> account;
-    account.insert(tr("Balance"), m_account->displayBalance());
-
-    m_properties.insert(tr("Account info"), account);
-
-    QMap<QString, QString> stats;
-    stats.insert(tr("Incomes"), formatValue(getSumTransactions(Transaction::INCOMES)));
-    stats.insert(tr("Expenses"), formatValue(getSumTransactions(Transaction::EXPENSES)));
-    m_properties.insert(tr("Statistics"), stats);
-
-    m_properties.insert(tr("Expenses by categories"),
-                        getTransactionsByCategories(Transaction::EXPENSES));
-
-    m_properties.insert(tr("Incomes by categories"),
-                        getTransactionsByCategories(Transaction::INCOMES));
-
-    emit resultReady();
+    m_d.d_incomes = getSumTransactions(Transaction::INCOMES);
+    m_d.d_expenses = getSumTransactions(Transaction::EXPENSES);
+    m_d.m_categoryExpenses = getTransactionsByCategories(Transaction::EXPENSES);
+    m_d.m_categoryIncomes = getTransactionsByCategories(Transaction::INCOMES);
 }
 
 QString AccountInfo::formatValue(double value)
@@ -84,9 +99,9 @@ double AccountInfo::getSumTransactions(int type)
     return q->value(0).toDouble();
 }
 
-QMap<QString, QString> AccountInfo::getTransactionsByCategories(int type)
+QMap<QString, double> AccountInfo::getTransactionsByCategories(int type)
 {
-    QMap<QString, QString> stats;
+    QMap<QString, double> categoriesStats;
 
     Transaction *tr = new Transaction(m_account->m_db, m_account);
     Category *cat = new Category(m_account->m_db);
@@ -105,7 +120,7 @@ QMap<QString, QString> AccountInfo::getTransactionsByCategories(int type)
     try {
         m_account->m_db->exec(q);
     } catch (int ) {
-        return stats;
+        return categoriesStats;
     }
 
     while (q->next()) {
@@ -113,8 +128,8 @@ QMap<QString, QString> AccountInfo::getTransactionsByCategories(int type)
         if (categoryName.isEmpty()) {
             categoryName = QObject::tr("Uncategorised");
         }
-        stats.insert(categoryName, formatValue(q->value(0).toDouble()));
+        categoriesStats.insert(categoryName, q->value(0).toDouble());
     }
 
-    return stats;
+    return categoriesStats;
 }

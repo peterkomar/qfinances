@@ -254,7 +254,6 @@ void TransactionWidget::slotSetProperties()
         i.next();
 
         QTreeWidgetItem *parent = m_properties->addGroup(i.key());
-
         QMapIterator<QString, QString> j(i.value());
         while (j.hasNext()) {
             j.next();
