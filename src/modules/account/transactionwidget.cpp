@@ -215,6 +215,9 @@ void TransactionWidget::loadAccountInfo()
     m_thread = new AccountInfo(m_account, m_filter, this);
     connect(m_thread, &AccountInfo::resultReady, this, &TransactionWidget::slotSetProperties);
     m_thread->start();
+
+    m_charts->setGeneralData(m_thread->getIncomes(), m_thread->getExpenses());
+    //m_charts->setGeneralData(5, 5);
 }
 
 void TransactionWidget::slotSetAccount(QTreeWidgetItem *item)
@@ -248,7 +251,7 @@ void TransactionWidget::slotSetProperties()
 {
     m_properties->clear();
 
-    PropertiesInfo info = m_thread->getResults();
+    PropertiesInfo info = m_thread->getFormatedResults();
     QMapIterator<QString, QMap<QString, QString>> i(info);
     while (i.hasNext()) {
         i.next();
@@ -262,6 +265,8 @@ void TransactionWidget::slotSetProperties()
     }
 
     m_properties->expandAll();
+
+    //m_charts->setGeneralData(m_thread->getIncomes(), m_thread->getExpenses());
 }
 
 void TransactionWidget::slotNew()

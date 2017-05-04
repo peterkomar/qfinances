@@ -21,7 +21,7 @@ AccountInfo::~AccountInfo()
     m_filter = nullptr;    
 }
 
-PropertiesInfo AccountInfo::getResults()
+PropertiesInfo AccountInfo::getFormatedResults()
 {
     PropertiesInfo properties;
 
@@ -52,6 +52,26 @@ PropertiesInfo AccountInfo::getResults()
 
 
     return properties;
+}
+
+double AccountInfo::getExpenses()
+{
+    return m_d.d_expenses;
+}
+
+double AccountInfo::getIncomes()
+{
+    return m_d.d_incomes;
+}
+
+CategoriesValues AccountInfo::getExpensesByCategories()
+{
+    return m_d.m_categoryExpenses;
+}
+
+CategoriesValues AccountInfo::getIncomesByCategories()
+{
+    return m_d.m_categoryIncomes;
 }
 
 void AccountInfo::run()

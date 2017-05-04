@@ -10,6 +10,8 @@
 #include <QtCharts/QBarSeries>
 #include <QtCharts/QBarSet>
 
+#include "../../project.h"
+
 //TEST
 #include <QTime>
 
@@ -22,7 +24,7 @@ TransactionsCharts::TransactionsCharts(QWidget *parent)
 {
     QGridLayout *baseLayout = new QGridLayout();
 
-    m_viewGeneral = new QChartView(createGeneralChart());
+    m_viewGeneral = new QChartView();
     m_viewGeneral->setRenderHint(QPainter::Antialiasing, true);
     baseLayout->addWidget(m_viewGeneral, 0, 0);
 
@@ -91,16 +93,21 @@ QChart* TransactionsCharts::createGeneralChart() const
 
 void TransactionsCharts::setGeneralData(qreal incomes, qreal expenses)
 {
-    m_viewGeneral->chart()->removeAllSeries();
+    QChart *oldChart = m_viewGeneral->chart();
+    QChart *newChart = createGeneralChart();
 
     QPieSeries *allSeries = new QPieSeries(this->parentWidget());
     allSeries->setName("All operations");
-    QList<QString> types;
-    types << "Incomes" << "Expenses";
 
     *allSeries << new QPieSlice(tr("Incomes"), incomes);
     *allSeries <<  new QPieSlice(tr("Expenses"), expenses);
-    m_viewGeneral->chart()->addSeries(allSeries);
+    newChart->addSeries(allSeries);
+    m_viewGeneral->setChart(newChart);
+    m_viewGeneral->resetCachedContent();
+    if (oldChart) {
+        delete oldChart;
+        oldChart = nullptr;
+    }
 }
 
 QChart* TransactionsCharts::createIncomesCategoriesChart() const

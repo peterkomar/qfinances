@@ -19,7 +19,11 @@ public:
 
     void run() Q_DECL_OVERRIDE;
 
-    PropertiesInfo getResults();
+    PropertiesInfo getFormatedResults();
+    double getExpenses();
+    double getIncomes();
+    CategoriesValues getExpensesByCategories();
+    CategoriesValues getIncomesByCategories();
 
 signals:
       void resultReady();
@@ -36,8 +40,8 @@ private:
     Filter* m_filter;
 
     struct {
-        double d_expenses;
-        double d_incomes;
+        qreal d_expenses;
+        qreal d_incomes;
 
         CategoriesValues m_categoryExpenses;
         CategoriesValues m_categoryIncomes;

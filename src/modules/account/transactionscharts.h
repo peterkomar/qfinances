@@ -4,6 +4,8 @@
 #include <QtWidgets/QWidget>
 #include <QtCharts/QChartGlobal>
 
+#include "accountinfo.h"
+
 QT_CHARTS_BEGIN_NAMESPACE
 class QChartView;
 class QChart;
