@@ -1,8 +1,8 @@
 #ifndef TRANSACTIONSCHARTS_H
 #define TRANSACTIONSCHARTS_H
 
-#include <QtWidgets/QWidget>
-#include <QtCharts/QChartGlobal>
+#include <QWidget>
+#include <QChartGlobal>
 
 #include "accountinfo.h"
 
