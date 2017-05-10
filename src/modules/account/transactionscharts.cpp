@@ -11,73 +11,42 @@
 #include <QtCharts/QBarSet>
 
 #include "../../project.h"
+#include "account.h"
+#include "../currency/currency.h"
 
 //TEST
 #include <QTime>
 
 TransactionsCharts::TransactionsCharts(QWidget *parent)
     : QWidget(parent)
+    ,m_account(nullptr)
     ,m_viewGeneral(nullptr)
     ,m_viewIncomesCategories(nullptr)
-    ,m_viewExpensesCategories(nullptr)
-    ,m_viewTransactions(nullptr)
+    ,m_viewExpensesCategories(nullptr)    
 {
     QGridLayout *baseLayout = new QGridLayout();
 
     m_viewGeneral = new QChartView();
     m_viewGeneral->setRenderHint(QPainter::Antialiasing, true);
-    baseLayout->addWidget(m_viewGeneral, 0, 0);
+    baseLayout->addWidget(m_viewGeneral, 0, 0, 1, 3);
 
     m_viewIncomesCategories = new QChartView();
     m_viewIncomesCategories->setRenderHint(QPainter::Antialiasing, true);
-    baseLayout->addWidget(m_viewIncomesCategories, 0, 1);
+    baseLayout->addWidget(m_viewIncomesCategories, 1, 0);
 
     m_viewExpensesCategories = new QChartView();
     m_viewExpensesCategories->setRenderHint(QPainter::Antialiasing, true);
-    baseLayout->addWidget(m_viewExpensesCategories, 0, 2);
-
-    m_viewTransactions = new QChartView(createTransactionsChart());
-    m_viewTransactions->setRenderHint(QPainter::Antialiasing, true);
-    baseLayout->addWidget(m_viewTransactions, 1, 0, 1, 3);
+    baseLayout->addWidget(m_viewExpensesCategories, 1, 1);
 
     setLayout(baseLayout);
 }
 
 TransactionsCharts::~TransactionsCharts()
 {
+    m_account = nullptr;
     delete m_viewExpensesCategories;
     delete m_viewGeneral;
-    delete m_viewIncomesCategories;
-    delete m_viewTransactions;
-}
-
-DataTable TransactionsCharts::generateRandomData() const
-{
-    int listCount = 3;
-    int m_valueMax = 0;
-    int valueMax = m_valueMax = 10;
-    int valueCount = 7;
-
-    DataTable dataTable;
-
-    // set seed for random stuff
-    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-
-    // generate random data
-    for (int i(0); i < listCount; i++) {
-        DataList dataList;
-        qreal yValue(0);
-        for (int j(0); j < valueCount; j++) {
-            yValue = yValue + (qreal)(qrand() % valueMax) / (qreal) valueCount;
-            QPointF value((j + (qreal) rand() / (qreal) RAND_MAX) * ((qreal) m_valueMax / (qreal) valueCount),
-                          yValue);
-            QString label = "Slice " + QString::number(i) + ":" + QString::number(j);
-            dataList << Data(value, label);
-        }
-        dataTable << dataList;
-    }
-
-    return dataTable;
+    delete m_viewIncomesCategories;    
 }
 
 QChart* TransactionsCharts::createPieChart(const QString& title) const
@@ -99,8 +68,8 @@ void TransactionsCharts::setGeneralData(qreal incomes, qreal expenses)
     QPieSeries *allSeries = new QPieSeries(this->parentWidget());
     allSeries->setName("All operations");
 
-    *allSeries << new QPieSlice(tr("Incomes"), incomes);
-    *allSeries <<  new QPieSlice(tr("Expenses"), expenses);
+    *allSeries << new QPieSlice(tr("Incomes (%1)").arg(m_account->currency()->displayPrice(incomes)), incomes);
+    *allSeries <<  new QPieSlice(tr("Expenses (%1)").arg(m_account->currency()->displayPrice(expenses)), expenses);
     newChart->addSeries(allSeries);
     m_viewGeneral->setChart(newChart);
     m_viewGeneral->resetCachedContent();
@@ -113,20 +82,24 @@ void TransactionsCharts::setGeneralData(qreal incomes, qreal expenses)
 void TransactionsCharts::setCategoriesData(const QString& title, CategoriesValues data)
 {
     QChartView *view = m_viewExpensesCategories;
+    QString name = tr("Expenses");
     if (title == tr("Incomes Categories")) {
-        view = m_viewIncomesCategories;
+        view = m_viewIncomesCategories;        
+        name = tr("Incomes");
     }
 
     QChart *oldChart = view->chart();
     QChart *newChart = createPieChart(title);
 
     QPieSeries *allSeries = new QPieSeries(this->parentWidget());
-    allSeries->setName("Incomes");
+    allSeries->setName(name);
 
     QMapIterator<QString, double> i(data);
     while (i.hasNext()) {
         i.next();
-        *allSeries << new QPieSlice(i.key(), i.value());
+        *allSeries << new QPieSlice(QString("%1 (%2)")
+                                    .arg(i.key())
+                                    .arg(m_account->currency()->displayPrice(i.value())), i.value());
     }
 
     newChart->addSeries(allSeries);
@@ -137,24 +110,4 @@ void TransactionsCharts::setCategoriesData(const QString& title, CategoriesValue
         oldChart = nullptr;
     }
     view = nullptr;
-}
-
-QChart* TransactionsCharts::createTransactionsChart() const
-{
-    QChart *chart = new QChart();
-      chart->setTitle("Bar chart");
-
-      DataTable m_dataTable = generateRandomData();
-
-      QStackedBarSeries *series = new QStackedBarSeries(chart);
-      for (int i(0); i < m_dataTable.count(); i++) {
-          QBarSet *set = new QBarSet("Bar set " + QString::number(i));
-          foreach (Data data, m_dataTable[i])
-              *set << data.first.y();
-          series->append(set);
-      }
-      chart->addSeries(series);
-      chart->createDefaultAxes();
-
-      return chart;
 }

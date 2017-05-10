@@ -240,6 +240,7 @@ void TransactionWidget::slotSetAccount(QTreeWidgetItem *item)
         return;
     }
 
+    m_charts->setAccount(m_account);
     m_view->loadTransactions(m_account, m_filter);
     loadAccountInfo();
 }

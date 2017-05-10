@@ -13,9 +13,7 @@ QT_CHARTS_END_NAMESPACE
 
 QT_CHARTS_USE_NAMESPACE
 
-typedef QPair<QPointF, QString> Data;
-typedef QList<Data> DataList;
-typedef QList<DataList> DataTable;
+class Account;
 
 class TransactionsCharts : public QWidget
 {
@@ -26,22 +24,19 @@ public:
 
     void setGeneralData(qreal incomes, qreal expenses);
     void setCategoriesData(const QString& title, CategoriesValues data);
+    void setAccount(Account* accont) { m_account = accont; }
 
 signals:
 
 public slots:
 
 private:
+    Account *m_account;
     QChartView *m_viewGeneral;
     QChartView *m_viewIncomesCategories;
     QChartView *m_viewExpensesCategories;
-    QChartView *m_viewTransactions;
-
-    //TESTmethod
-    DataTable generateRandomData() const;
 
     QChart *createPieChart(const QString& title) const;
-    QChart* createTransactionsChart() const;
 };
 
 #endif // TRANSACTIONSCHARTS_H
