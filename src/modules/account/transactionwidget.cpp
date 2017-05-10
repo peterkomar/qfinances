@@ -263,6 +263,8 @@ void TransactionWidget::slotSetProperties()
 
     m_properties->expandAll();
     m_charts->setGeneralData(m_thread->getIncomes(), m_thread->getExpenses());
+    m_charts->setCategoriesData(tr("Incomes Categories"), m_thread->getIncomesByCategories());
+    m_charts->setCategoriesData(tr("Expenses Categories"), m_thread->getExpensesByCategories());
 }
 
 void TransactionWidget::slotNew()

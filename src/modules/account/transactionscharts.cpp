@@ -28,11 +28,11 @@ TransactionsCharts::TransactionsCharts(QWidget *parent)
     m_viewGeneral->setRenderHint(QPainter::Antialiasing, true);
     baseLayout->addWidget(m_viewGeneral, 0, 0);
 
-    m_viewIncomesCategories = new QChartView(createIncomesCategoriesChart());
+    m_viewIncomesCategories = new QChartView();
     m_viewIncomesCategories->setRenderHint(QPainter::Antialiasing, true);
     baseLayout->addWidget(m_viewIncomesCategories, 0, 1);
 
-    m_viewExpensesCategories = new QChartView(createExpensesCategoriesChart());
+    m_viewExpensesCategories = new QChartView();
     m_viewExpensesCategories->setRenderHint(QPainter::Antialiasing, true);
     baseLayout->addWidget(m_viewExpensesCategories, 0, 2);
 
@@ -80,10 +80,10 @@ DataTable TransactionsCharts::generateRandomData() const
     return dataTable;
 }
 
-QChart* TransactionsCharts::createGeneralChart() const
+QChart* TransactionsCharts::createPieChart(const QString& title) const
 {
     QChart *chart = new QChart();
-    chart->setTitle(tr("General"));
+    chart->setTitle(title);
     chart->setTheme(QChart::ChartThemeLight);
     chart->setAnimationOptions(QChart::AllAnimations);
     chart->legend()->setVisible(true);
@@ -94,7 +94,7 @@ QChart* TransactionsCharts::createGeneralChart() const
 void TransactionsCharts::setGeneralData(qreal incomes, qreal expenses)
 {
     QChart *oldChart = m_viewGeneral->chart();
-    QChart *newChart = createGeneralChart();
+    QChart *newChart = createPieChart(tr("General"));
 
     QPieSeries *allSeries = new QPieSeries(this->parentWidget());
     allSeries->setName("All operations");
@@ -110,44 +110,33 @@ void TransactionsCharts::setGeneralData(qreal incomes, qreal expenses)
     }
 }
 
-QChart* TransactionsCharts::createIncomesCategoriesChart() const
+void TransactionsCharts::setCategoriesData(const QString& title, CategoriesValues data)
 {
-    QChart *chart = new QChart();
-      chart->setTitle("Bar chart");
+    QChartView *view = m_viewExpensesCategories;
+    if (title == tr("Incomes Categories")) {
+        view = m_viewIncomesCategories;
+    }
 
-      DataTable m_dataTable = generateRandomData();
+    QChart *oldChart = view->chart();
+    QChart *newChart = createPieChart(title);
 
-      QStackedBarSeries *series = new QStackedBarSeries(chart);
-      for (int i(0); i < m_dataTable.count(); i++) {
-          QBarSet *set = new QBarSet("Bar set " + QString::number(i));
-          foreach (Data data, m_dataTable[i])
-              *set << data.first.y();
-          series->append(set);
-      }
-      chart->addSeries(series);
-      chart->createDefaultAxes();
+    QPieSeries *allSeries = new QPieSeries(this->parentWidget());
+    allSeries->setName("Incomes");
 
-      return chart;
-}
+    QMapIterator<QString, double> i(data);
+    while (i.hasNext()) {
+        i.next();
+        *allSeries << new QPieSlice(i.key(), i.value());
+    }
 
-QChart* TransactionsCharts::createExpensesCategoriesChart() const
-{
-    QChart *chart = new QChart();
-      chart->setTitle("Bar chart");
-
-      DataTable m_dataTable = generateRandomData();
-
-      QStackedBarSeries *series = new QStackedBarSeries(chart);
-      for (int i(0); i < m_dataTable.count(); i++) {
-          QBarSet *set = new QBarSet("Bar set " + QString::number(i));
-          foreach (Data data, m_dataTable[i])
-              *set << data.first.y();
-          series->append(set);
-      }
-      chart->addSeries(series);
-      chart->createDefaultAxes();
-
-      return chart;
+    newChart->addSeries(allSeries);
+    view->setChart(newChart);
+    view->resetCachedContent();
+    if (oldChart) {
+        delete oldChart;
+        oldChart = nullptr;
+    }
+    view = nullptr;
 }
 
 QChart* TransactionsCharts::createTransactionsChart() const

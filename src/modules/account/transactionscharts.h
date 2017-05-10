@@ -25,6 +25,7 @@ public:
     ~TransactionsCharts();
 
     void setGeneralData(qreal incomes, qreal expenses);
+    void setCategoriesData(const QString& title, CategoriesValues data);
 
 signals:
 
@@ -39,9 +40,7 @@ private:
     //TESTmethod
     DataTable generateRandomData() const;
 
-    QChart *createGeneralChart() const;
-    QChart* createIncomesCategoriesChart() const;
-    QChart* createExpensesCategoriesChart() const;
+    QChart *createPieChart(const QString& title) const;
     QChart* createTransactionsChart() const;
 };
 
