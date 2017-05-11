@@ -22,7 +22,7 @@ TransactionsCharts::TransactionsCharts(QWidget *parent)
     ,m_account(nullptr)
     ,m_viewGeneral(nullptr)
     ,m_viewIncomesCategories(nullptr)
-    ,m_viewExpensesCategories(nullptr)    
+    ,m_viewExpensesCategories(nullptr)
 {
     QGridLayout *baseLayout = new QGridLayout();
 
@@ -57,6 +57,7 @@ QChart* TransactionsCharts::createPieChart(const QString& title) const
     chart->setAnimationOptions(QChart::AllAnimations);
     chart->legend()->setVisible(true);
     chart->legend()->setAlignment(Qt::AlignRight);
+
     return chart;
 }
 
@@ -68,8 +69,22 @@ void TransactionsCharts::setGeneralData(qreal incomes, qreal expenses)
     QPieSeries *allSeries = new QPieSeries(this->parentWidget());
     allSeries->setName("All operations");
 
-    *allSeries << new QPieSlice(tr("Incomes (%1)").arg(m_account->currency()->displayPrice(incomes)), incomes);
-    *allSeries <<  new QPieSlice(tr("Expenses (%1)").arg(m_account->currency()->displayPrice(expenses)), expenses);
+    QPieSlice *incomesSlice = new QPieSlice();
+    incomesSlice->setLabel(tr("Incomes (%1)")
+                           .arg(m_account->currency()->displayPrice(incomes)));
+    incomesSlice->setValue(incomes);
+    incomesSlice->setColor(QColor("darkGreen"));
+    incomesSlice->setExploded(true);
+
+    QPieSlice *expensesSlice = new QPieSlice();
+    expensesSlice->setLabel(tr("Expenses (%1)")
+                            .arg(m_account->currency()->displayPrice(expenses)));
+    expensesSlice->setValue(expenses);
+    expensesSlice->setColor(QColor("darkRed"));
+
+
+    *allSeries << incomesSlice;
+    *allSeries <<  expensesSlice;
     newChart->addSeries(allSeries);
     m_viewGeneral->setChart(newChart);
     m_viewGeneral->resetCachedContent();
@@ -111,3 +126,4 @@ void TransactionsCharts::setCategoriesData(const QString& title, CategoriesValue
     }
     view = nullptr;
 }
+

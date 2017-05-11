@@ -358,7 +358,7 @@ void TransactionWidget::slotCharts()
 {
     if (m_widget->currentIndex() == 0) {
         viewModeBtn->setText(tr("List"));
-        m_widget->setCurrentIndex(1);
+        m_widget->setCurrentIndex(1);        
     } else {
         viewModeBtn->setText(tr("Charts"));
         m_widget->setCurrentIndex(0);
