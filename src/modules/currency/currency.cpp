@@ -152,11 +152,16 @@ void Currency::fetch(QSqlQuery *q)
 
 QString Currency::displayPrice(double price)
 {
-    QString currencyString;
+    /*QString currencyString;
 
     currencyString.setNum(price, 'f', 2);
     if (m_d.s_symbol_left.isEmpty()) {
         return currencyString + " " + m_d.s_symbol_right;
     }
-    return m_d.s_symbol_left + " " + currencyString;
+    return m_d.s_symbol_left + " " + currencyString;*/
+    QLocale locale = QLocale::system();
+    return locale.toCurrencyString(price,
+                                   m_d.s_symbol_left.isEmpty()?
+                                   m_d.s_symbol_right
+                                   : m_d.s_symbol_left);
 }

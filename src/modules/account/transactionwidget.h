@@ -36,6 +36,7 @@ class Account;
 class TransactionsView;
 class Transaction;
 class AccountInfo;
+class TransactionsCharts;
 
 class TransactionWidget : public ModuleWidget
 {
@@ -57,6 +58,7 @@ public slots:
     void slotTransfer();
     void slotRevert();
     void slotView();
+    void slotCharts();
 
 protected:
     virtual void topPanel(QVBoxLayout *layout);
@@ -72,9 +74,12 @@ private:
 
     QMap<QString, QPushButton*> m_filterPanelGroups;
     Filter *m_filter;
+    QStackedWidget *m_widget;
     TransactionsView *m_view;
     Account *m_account;
     AccountInfo *m_thread;
+    TransactionsCharts *m_charts;
+    QToolButton *viewModeBtn;
 };
 
 #endif // TRANSACTIONWIDGET_H

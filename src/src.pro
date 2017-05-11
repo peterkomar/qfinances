@@ -13,7 +13,6 @@ UI_DIR = ../build
 RCC_DIR = ../build
 
 # Components
-include(core/core.pri)
 include(modules/account/account.pri)
 include(modules/currency/currency.pri)
 include(modules/category/category.pri)
@@ -58,7 +57,7 @@ win32{
 macx: {
   ICON = pictures/myfinances2.icns
 }
-QT += widgets sql printsupport
+QT += widgets sql printsupport charts
 
 FORMS +=
 

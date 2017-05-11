@@ -22,7 +22,7 @@
 #define MODULE_H
 
 #include <QObject>
-#include <QtWidgets/QStackedWidget>
+#include <QStackedWidget>
 #include <QDebug>
 #include "navpanel.h"
 #include "database.h"

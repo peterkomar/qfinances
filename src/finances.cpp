@@ -95,7 +95,7 @@ void Finances::_gui()
   propertiesDock->setWidget(m_d->m_properties);
   addDockWidget(Qt::LeftDockWidgetArea, propertiesDock);
 
-  NavPanel *management = new NavPanel(this, QLayout::SetFixedSize);
+  NavPanel *management = new NavPanel(this, QLayout::SetMinimumSize);
   connect(management, SIGNAL(clickItem(NavPanelItem*)), this, SLOT(slotClickBottomPanelItem(NavPanelItem*)));
   m_d->m_cfg = management->addItemGroup(tr("Management"));
 
@@ -120,7 +120,7 @@ void Finances::_gui()
           "background: rgb(200, 200, 200);"
           "width: 1px;"
           "height: 1px;"
-      "}");
+       "}");
 }
 
 bool Finances::login()
@@ -143,10 +143,12 @@ void Finances::slot_successLogin(LoginDialog *dialog)
         delete m_d->m_db;
         m_d->m_db = 0;
         dialog->setFocusPassword(true);
+        return;
     } catch(int code) {
-      QMessageBox::critical(this, tr("App Init Fail"), tr("Can't initialize app. Check app output for more details"));
-      delete m_d->m_db;
-      m_d->m_db = 0;      
+        QMessageBox::critical(this, tr("App Init Fail"), tr("Can't initialize app. Check app output for more details"));
+        delete m_d->m_db;
+        m_d->m_db = 0;
+        return;
   }
 
 
