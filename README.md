@@ -13,7 +13,7 @@ Featuers:
 * print transactions
 * generate reports
 * supports impors transactions from CSV
-* supports sync transactions with [myFinances] (https://play.google.com/store/apps/details?id=cicero.minhasfinancas) via CSV file
+* supports sync transactions with [myFinances] (https://play.google.com/store/apps/details?id=com.sevencsolutions.myfinances) via CSV file
 
 Requirements:
 * [QT 5](http://www.qt.io/)
